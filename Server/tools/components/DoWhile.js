@@ -14,38 +14,11 @@ class DoWhile {
      * @param column Columna de la sentencia 
      */
     constructor(List, condition,line, column) {
+        this.name = "DoWhile";
         this.line = line;
         this.column = column;
         this.condition = condition;
-        this.List = List;
-    }
-    execute(table, tree) {
-        /*const newtable = new Table_1.Table(table);
-        let result;
-        do {
-            result = this.condition.execute(newtable, tree);
-            if (result instanceof Exception_1.Exception) {
-                return result;
-            }
-            if (this.condition.type.type !== Type_1.types.BOOLEAN) {
-                const error = new Exception_1.Exception('Semantico', `Se esperaba una expresion booleana para la condicion`, this.line, this.column);
-                tree.excepciones.push(error);
-                tree.console.push(error.toString());
-                return error;
-            }
-            if (result) {
-                for (let i = 0; i < this.List.length; i++) {
-                    const res = this.List[i].execute(newtable, tree);
-                    if (res instanceof Continue_1.Continue) {
-                        break;
-                    }
-                    else if (res instanceof Break_1.Break) {
-                        return;
-                    }
-                }
-            }
-        } while (result);
-        return null;*/
+        this.list = List;
     }
 }
 exports.DoWhile = DoWhile;

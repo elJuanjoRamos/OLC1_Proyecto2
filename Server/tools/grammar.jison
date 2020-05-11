@@ -7,6 +7,7 @@
     const {Class}                   = require('./components/Class');
     const {Import}                  = require('./components/Import');
     const {If}                      = require('./components/If');
+    const {Else}                      = require('./components/Else');
     const {Identifier}              = require('./components/Identifier');
     const {Switch}                  = require('./components/Switch');
     const {Case}                    = require('./components/Case');
@@ -124,7 +125,7 @@ linecomment             "//"(.|{identifier}|{NUMBER}|{decimal})*?
 
 INIT     
     :/* empty */     { $$ = ''; console.log("empty"); } 
-    | INSTRUCCIONS EOF {$$ = new Tree($1); return $$;}
+    | INSTRUCCIONS EOF      {$$ = new Tree($1); return $$;}
     ;
 
 //INSTRUCCIONES GLOBALES
@@ -137,14 +138,15 @@ INSTRUCCIONS
 //INSTRUCCIONES EN FUNCION O METODO
 INSTRUCCIONS2 
     : INSTRUCCIONS2 DECLARATION_TYPE_FUNCTION   { $$ = $1; $$.push($2); }
-    | DECLARATION_TYPE_FUNCTION                { $$ = [$1]; }
+    | DECLARATION_TYPE_FUNCTION                 { $$ = [$1]; }
     ;
 
 
 
 //GLOBALES
-DECLARATION_TYPE 
-    : DECLARATION       {$$ = $1;}
+DECLARATION_TYPE
+    : CLASS             {$$ = $1;}        
+    | DECLARATION       {$$ = $1;}
     | ASIGNATION        {$$ = $1;}
     | IF                {$$ = $1;}
     | COMMENTS          {$$ = $1;}
@@ -157,8 +159,9 @@ DECLARATION_TYPE
     | 'continue' ';'    {$$ = new Continue($1, this._$.first_line, this._$.first_column);}
     | 'break' ';'       {$$ = new Break($1, this._$.first_line, this._$.first_column);}
     | 'return' RETURN   {$$ = new Return( $1, $2, this._$.first_line, this._$.first_column);}
-    | error             {$$ = new Exception(yytext, "ERROR SINTACTICO en linea " + this._$.first_line 
-                                                    + ", columna: " +  this._$.first_column, this._$.first_line, this._$.first_column)}
+    | error             {$$ = new Exception(yytext, "ERROR SINTACTICO: " + yytext + " en linea: " + (this._$.first_line - 1) 
+                                                    + ", columna: " +  this._$.last_column, this._$.first_line, this._$.first_column)}
+    
     ;
 
 
@@ -176,7 +179,8 @@ DECLARATION_TYPE_FUNCTION
     | 'continue' ';'    {$$ = new Continue($1, this._$.first_line, this._$.first_column);}
     | 'break' ';'       {$$ = new Break($1, this._$.first_line, this._$.first_column);}
     | 'return' RETURN   {$$ = new Return( $1, $2, this._$.first_line, this._$.first_column);}
-    | error             {$$ = new Exception(yylloc, "Se esperaba un " + yylloc, this._$.first_line, this._$.first_column)}
+    | error             {$$ = new Exception(yytext, "ERROR SINTACTICO: " + yytext + " en linea: " + (this._$.first_line - 1) 
+                                                    + ", columna: " +  this._$.last_column, this._$.first_line, this._$.first_column)}
     ;
 
 
@@ -190,7 +194,7 @@ ERROR
 
 /*SECCION CLASS*/
 CLASS 
-    : IMPORT 'class' identifier '{' INSTRUCCIONS '}' {$$ = new Class($3, $4, $1);} 
+    : IMPORT 'class' identifier '{' INSTRUCCIONS '}' {$$ = new Class($3, $5, $1);} 
     ;
 RETURN 
     : EXPRESION ';'     {$$ = $1;}
@@ -199,13 +203,14 @@ RETURN
 
 /* SECCION IMPORT */
 
-IMPORT 
-    : MORE_IMPORT 'import' identifier ';' {$$ = new Import($2,  this._$.first_line, this._$.first_column);}
+IMPORTS
+    : IMPORTS IMPORT    { $$ = $1; $$.push($2); }  
+    | IMPORT            {$$ = $1;}
     ;
 
-MORE_IMPORT
-    : IMPORT
-    | //EPSILON
+IMPORT
+    : 'import' identifier ';' {$$ = new Import($2,  this._$.first_line, this._$.first_column);}
+    //| //EPSILON
     ;
 
 
@@ -273,9 +278,6 @@ ASIGNATION2
     ;
 
 
-
-
-
 /*SECCION METODOS Y FUNCIONES*/
 PARAMETERS 
     : PARAMETER
@@ -312,7 +314,7 @@ VOID_METHOD
 /*SECCION IF*/
 
 IF : 'if' IF_CONDITION INSTRUCCIONS_BLOCK                           {$$ = new If($2, $3, [], this._$.first_line, this._$.first_column);}
-   | 'if' IF_CONDITION INSTRUCCIONS_BLOCK 'else' INSTRUCCIONS_BLOCK {$$ = new If($2, $3, $5, this._$.first_line, this._$.first_column);}
+   | 'if' IF_CONDITION INSTRUCCIONS_BLOCK 'else' INSTRUCCIONS_BLOCK {$$ = new If($2, $3, new Else($5,this._$.first_line, this._$.first_column), this._$.first_line, this._$.first_column);}
    | 'if' IF_CONDITION INSTRUCCIONS_BLOCK 'else' IF                 {$$ = new If($2, $3, [$5], this._$.first_line, this._$.first_column);}
    ;
 

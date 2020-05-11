@@ -15,13 +15,26 @@ var api = "/api/v1/server";
 
 /*
 const lexer = require("./tools/grammar");
+var analizerController = require('./controller/AnalizerController');
 
+var anController = new analizerController();
 
-var tree = lexer.parse("int a = 0; int b = 0 int c = 0; \nif(a<) { int b = 0} int d = 5; int f = 7;");
+var tree = lexer.parse("import a ; class a{  int a = 0; for(a = 0; a<65; a++) { int b }    }");
+console.log(tree.instructions[0])
+tree.instructions[0].list.forEach(e => {
+  if(e.name == "Exception"){
+    //array.push(e.description)
+  } else {
+    if(e.name == "For"|| e.name == "Switch" || e.name == "Case" 
+                || e.name == "Do" || e.name == "While"){
+                  anController.armarExcepciones(e.list)
+                }
+   
+  }
+});
+console.log("pinteado")
+console.log(anController.getArray());*/
 
-console.log(tree)
-
-*/
 /*tree.instructions.forEach(element => {
   if(element.name == "Exception"){
     console.log("g")

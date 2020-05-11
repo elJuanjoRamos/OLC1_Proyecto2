@@ -9,7 +9,7 @@ class While {
     /**
      * @constructor 
      * @param condition Condicion que debe ser tipo boolean
-     * @param List Lista de instrucciones 
+     * @param list Lista de instrucciones 
      * @param line Linea de la sentencia 
      * @param column Columna de la sentencia 
      */
@@ -18,7 +18,7 @@ class While {
         this.line = line;
         this.column = column;
         this.condition = condition;
-        this.List = List;
+        this.list = List;
     }
 }
 exports.While = While;

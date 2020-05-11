@@ -8,6 +8,7 @@ class DataType{
      * 
      */
     constructor(t){
+        this.name = "DataType";
         this.type = t;
     }
     toString(){

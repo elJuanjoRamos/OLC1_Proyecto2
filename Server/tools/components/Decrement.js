@@ -8,6 +8,7 @@ class Decrement {
      * @param column Columna de la sentencia 
      */
     constructor(id, op1,op2, l, c) {
+        this.name = "Decrement";
         this.identifier = id;
         this.operator = op1;
         this.operator2 = op2;

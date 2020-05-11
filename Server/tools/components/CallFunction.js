@@ -7,6 +7,7 @@ class CallFunction  {
      * @param column Columna de la sentencia
      */
     constructor(id, lst, l, c) {
+        this.name = "CallFunction";
         this.line = l;
         this.column = c;
         this.identifier = id;

@@ -6,12 +6,10 @@ class Break {
      * @param identifier Columna del break
      */
     constructor(id, l, c) {
+        this.name = "Break";
         this.identifier = id;
         this.line = l;
         this.column= c;
-    }
-    execute(table, tree) {
-        return this;
     }
 }
 exports.Break = Break;

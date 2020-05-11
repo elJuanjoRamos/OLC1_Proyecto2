@@ -2,6 +2,7 @@ class Class{
     id;
     list;
     importList;
+    name;
     /**
      * 
      * @constructor Crea un nuevo tipo con el tipo primitivo 
@@ -10,6 +11,7 @@ class Class{
      * 
      */
     constructor(t, l, il){
+        this.name = "Class";
         this.id = t;
         this.list = l;
         this.importList = il;

@@ -19,147 +19,18 @@ var arrayLexico []string
 var arraySintactico []string
 var textoActual = ""
 var textoConsola = ""
-//QUE INSTALAR
-//go get github.com/gorilla/mux
-//go get github.com/gopherjs/gopherjs/js
-//go get github.com/siongui/godom
-//go get honnef.co/go/js/dom
-
-
-type Page struct {
-	Tittle 	string
-	Text 	string
-	Console string
-}
-
-type Respuesta struct {
-	Entrada	 string  `json:"entrada"` 
-	AST      ast 	 `json:"ast"`
-	Console  []string `json:"consola"`
-	Type     string   `json:"type"`	 		
-}
-
-
-type ast struct {
-	Instructions []inst `json:"instructions"`
-
-}
-
-type inst struct {
-	 Name string `json:"name"`
-
-}
-
-type console struct {
-	Content []data `json:"content"`
-}
-
-type data struct {
-	Data string `json:"data"`
-
-}
+var tipoError = ""
 
 
 
 
 
-
-func EndPoint(w http.ResponseWriter, r *http.Request) {
-
-	if r.URL.Path != "/analizar" {
-        http.Error(w, "404 not found.", http.StatusNotFound)
-        return
-    }
- 
-    switch r.Method {
-    case "GET":     
-         //http.ServeFile(w, r, "index.html")
-    case "POST":
-        // Call ParseForm() to parse the raw query and update r.PostForm and r.Form.
-        if err := r.ParseForm(); err != nil {
-            fmt.Fprintf(w, "ParseForm() err: %v", err)
-            return
-		}
-		//OBTENTO LA DATA DEL TEXT AREA
-		content := r.FormValue("textAreaAnalizar")
-		textoActual = content
-		url := "http://localhost:3000/api/v1/server/analizar"
-
-		//SE CREA EL JSON QUE SE VA A ENVIAR
-		requestBody, err := json.Marshal(map[string]string{
-			"entrada" 	: 	content,
-			"consola"	:	"consola"}) 
-
-		if err != nil {
-			fmt.Println(err)
-		} 
-
-		////METODO POST
-		resp, err := http.Post(url, "application/json", bytes.NewBuffer(requestBody))
-		
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		defer resp.Body.Close()
-		//////
-
-
-		///SE HACE UN JSON PARSE AL BODY DEL REQUEST PARA OBTENER LOS DATOS 
-		//OBTENIDOS AL HACER POST
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			panic(err)
-		}
-		var t Respuesta
-		err = json.Unmarshal(body, &t)
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println(t)
-		text := ""
-		for i, s := range t.Console {
-			fmt.Println(i)
-			if t.Type == "lexico" {
-				arrayLexico = append(arrayLexico, s)
-			} else {
-				arraySintactico = append(arraySintactico, s)
-			}
-			text = text + s + "\n"
-		}
-		textoConsola = text
-		//SE HACE UNA LLAMADA A LA PAGINA NUEVAMENTE
-		p := Page{ Tittle : "Proyecto 2", Text : content, Console: text}
-		temp, _ := template.ParseFiles("index.html")
-		temp.Execute(w, p)
-
-
-    default:
-        fmt.Fprintf(w, "Sorry, only GET and POST methods are supported.")
-	}
-	
-}
-
-
-
-
-func GetError(w http.ResponseWriter, r *http.Request) {
-	
-	//CREA EL ARCHIVO HTML
-	file, err :=os.Create("lexError.html")
-	if err != nil {
-		panic(err)
-	}
-	buf := bufio.NewWriter(file)
-
-
-
-	var head = "<!DOCTYPE html>\n" +
+var head = "<!DOCTYPE html>\n" +
 	"<html>\n" +
 	"<head>\n" +
 	"    <meta charset='utf-8'>\n" +
 	"    <meta http-equiv='X-UA-Compatible' content='IE=edge'>\n" +
-	"    <title> Repote de Errores Lexicos" + "</title>\n" +
+	"    <title> Repote de Errores" + "</title>\n" +
 	"    <meta name='viewport' content='width=device-width, initial-scale=1'>\n" +
 	"    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>\n" +
 	"    <script src='main.js'></script>\n" +
@@ -211,13 +82,162 @@ func GetError(w http.ResponseWriter, r *http.Request) {
 		  "); " +
 		"</script>";
 
+
+
+
+
+
+//QUE INSTALAR
+//go get github.com/gorilla/mux
+//go get github.com/gopherjs/gopherjs/js
+//go get github.com/siongui/godom
+//go get honnef.co/go/js/dom
+
+
+type Page struct {
+	Tittle 	string
+	Text 	string
+	Console string
+}
+
+type Respuesta struct {
+	Entrada	 string  `json:"entrada"` 
+	AST      ast 	 `json:"ast"`
+	Console  []string `json:"consola"`
+	Type     string   `json:"type"`	 		
+}
+
+
+type ast struct {
+	Instructions []inst `json:"instructions"`
+
+}
+
+type inst struct {
+	 Name string `json:"name"`
+
+}
+
+type console struct {
+	Content []data `json:"content"`
+}
+
+type data struct {
+	Data string `json:"data"`
+
+}
+
+
+
+
+
+
+func EndPoint(w http.ResponseWriter, r *http.Request) {
+
+	if r.URL.Path != "/analizar" {
+        http.Error(w, "404 not found.", http.StatusNotFound)
+        return
+    }
+    switch r.Method {
+    case "GET":     
+         //http.ServeFile(w, r, "index.html")
+    case "POST":
+        // Call ParseForm() to parse the raw query and update r.PostForm and r.Form.
+        if err := r.ParseForm(); err != nil {
+            fmt.Fprintf(w, "ParseForm() err: %v", err)
+            return
+		}
+		//OBTENTO LA DATA DEL TEXT AREA
+		content := r.FormValue("textAreaAnalizar")
+		textoActual = content
+		url := "http://localhost:3000/api/v1/server/analizar"
+
+		//SE CREA EL JSON QUE SE VA A ENVIAR
+		requestBody, err := json.Marshal(map[string]string{
+			"entrada" 	: 	content,
+			"consola"	:	"consola"}) 
+
+		if err != nil {
+			fmt.Println(err)
+		} 
+
+		////METODO POST
+		resp, err := http.Post(url, "application/json", bytes.NewBuffer(requestBody))
+		
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		defer resp.Body.Close()
+		//////
+
+
+		///SE HACE UN JSON PARSE AL BODY DEL REQUEST PARA OBTENER LOS DATOS 
+		//OBTENIDOS AL HACER POST
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			panic(err)
+		}
+		var t Respuesta
+		err = json.Unmarshal(body, &t)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(t)
+		text := ""
+		for i, s := range t.Console {
+			fmt.Println(i)
+			if t.Type == "lexico" {
+				tipoError = "lexico";
+				arrayLexico = append(arrayLexico, s)
+			} else {
+				tipoError = "sintactico"
+				arraySintactico = append(arraySintactico, s)
+			}
+			text = text + s + "\n"
+		}
+		textoConsola = text
+		//SE HACE UNA LLAMADA A LA PAGINA NUEVAMENTE
+		p := Page{ Tittle : "Proyecto 2", Text : content, Console: text}
+		temp, _ := template.ParseFiles("index.html")
+		temp.Execute(w, p)
+
+
+    default:
+        fmt.Fprintf(w, "Sorry, only GET and POST methods are supported.")
+	}
+	
+}
+
+
+
+
+func GetError(w http.ResponseWriter, r *http.Request) {
+	
+	//CREA EL ARCHIVO HTML
+	file, err :=os.Create("error.html")
+	if err != nil {
+		panic(err)
+	}
+	buf := bufio.NewWriter(file)
+
 	var cadena = ""
-	for i, s := range arrayLexico {
-		a := strconv.Itoa(i)
-		cadena = cadena + "<tr>\n" +
-		"     <th scope=\"row\">" + a + "</th>\n" +
-		"     <td>" + s + "</td>\n" +
-		"</tr>"
+	if tipoError == "lexico" {
+		for i, s := range arrayLexico {
+			a := strconv.Itoa(i)
+			cadena = cadena + "<tr>\n" +
+			"     <th scope=\"row\">" + a + "</th>\n" +
+			"     <td>" + s + "</td>\n" +
+			"</tr>"
+		}
+	} else {
+		for i, s := range arraySintactico {
+			a := strconv.Itoa(i)
+			cadena = cadena + "<tr>\n" +
+			"     <th scope=\"row\">" + a + "</th>\n" +
+			"     <td>" + s + "</td>\n" +
+			"</tr>"
+		}
 	}
 	
 	//ESCRIBE EN EL DOCUMENTO
@@ -230,7 +250,6 @@ func GetError(w http.ResponseWriter, r *http.Request) {
 	p := Page{ Tittle : "Proyecto 2", Text : textoActual, Console: textoConsola}
 	temp, _ := template.ParseFiles("index.html")
 	temp.Execute(w, p)
-	
 }
 
 func indexHandler(w http.ResponseWriter, req *http.Request){

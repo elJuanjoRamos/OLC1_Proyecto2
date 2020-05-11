@@ -10,6 +10,7 @@ class ArithmeticExpression {
      * @param type tipo de la operacion
      */
     constructor(lft, rgt, op, l, c) {
+        this.name = "ArithmeticExpression";
         this.line  = l;
         this.column = c;
         this.left = lft;

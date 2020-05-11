@@ -6,6 +6,7 @@ class Comment {
      * @param type Columna del break
      */
     constructor(t,  l, c) {
+        this.name ="Comment";
         this.type = t;
         this.line = l;
         this.column= c;

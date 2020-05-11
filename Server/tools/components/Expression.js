@@ -7,6 +7,7 @@ class Expression {
      * @param column Columna donde se creo la sentencia
      */
     constructor(t, v, l, c) {
+        this.name = "Expression";
         this.line = l;
         this.data = v;
         this.type = t;
