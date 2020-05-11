@@ -6,8 +6,10 @@ class If  {
      * @param ElseList Lista de instrucciones a ejecutar en caso la condicion sea falsa
      * @param line Linea de la sentencia if
      * @param column Columna de la sentencia if
-     */
+     * @param name
+     *      */
     constructor(cond, lst, el, l, c) {
+        this.name = "If"
         this.line = l;
         this.column = c;
         this.condition = cond;

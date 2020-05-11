@@ -26,6 +26,7 @@
     const {ArithmeticExpression}    = require('./components/ArithmeticExpression');
     const {LogicExpression}         = require('./components/LogicExpression');
     const {RelationalExpression}    = require('./components/RelationalExpression');
+    const {Exception}               = require('./components/Exception');
     
 %}
 %lex
@@ -153,10 +154,11 @@ DECLARATION_TYPE
     | FOR               {$$ = $1;}
     | SWITCH            {$$ = $1;}
     | VOID_METHOD       {$$ = $1;}
-    | 'continue' ';'    {$$ = new Continue($1, _$.first_line, _$.first_column);}
-    | 'break' ';'       {$$ = new Break($1, _$.first_line, _$.first_column);}
-    | 'return' RETURN   {$$ = new Return( $1, $2, _$.first_line, _$.first_column);}
-    | error ';'       {$$ = new Return( null, null, _$.first_line, _$.first_column);}
+    | 'continue' ';'    {$$ = new Continue($1, this._$.first_line, this._$.first_column);}
+    | 'break' ';'       {$$ = new Break($1, this._$.first_line, this._$.first_column);}
+    | 'return' RETURN   {$$ = new Return( $1, $2, this._$.first_line, this._$.first_column);}
+    | error             {$$ = new Exception(yytext, "ERROR SINTACTICO en linea " + this._$.first_line 
+                                                    + ", columna: " +  this._$.first_column, this._$.first_line, this._$.first_column)}
     ;
 
 
@@ -171,14 +173,20 @@ DECLARATION_TYPE_FUNCTION
     | PRINT             {$$ = $1;}
     | FOR               {$$ = $1;}
     | SWITCH            {$$ = $1;}
-    | 'continue' ';'    {$$ = new Continue($1, _$.first_line, _$.first_column);}
-    | 'break' ';'       {$$ = new Break($1, _$.first_line, _$.first_column);}
-    | 'return' RETURN   {$$ = new Return( $1, $2, _$.first_line, _$.first_column);}
-    | error ';'         {$$ = new Return( null, null, _$.first_line, _$.first_column);}
+    | 'continue' ';'    {$$ = new Continue($1, this._$.first_line, this._$.first_column);}
+    | 'break' ';'       {$$ = new Break($1, this._$.first_line, this._$.first_column);}
+    | 'return' RETURN   {$$ = new Return( $1, $2, this._$.first_line, this._$.first_column);}
+    | error             {$$ = new Exception(yylloc, "Se esperaba un " + yylloc, this._$.first_line, this._$.first_column)}
     ;
 
 
-
+ERROR 
+    : '}'
+    | ';'        
+    | ')'        
+    | '{'        
+    | '('        
+    ;
 
 /*SECCION CLASS*/
 CLASS 
@@ -192,7 +200,7 @@ RETURN
 /* SECCION IMPORT */
 
 IMPORT 
-    : MORE_IMPORT 'import' identifier ';' {$$ = new Import($2,  _$.first_line, _$.first_column);}
+    : MORE_IMPORT 'import' identifier ';' {$$ = new Import($2,  this._$.first_line, this._$.first_column);}
     ;
 
 MORE_IMPORT
@@ -212,19 +220,19 @@ TYPE : 'int'        {$$ = new DataType('int');}
 
 /* SECCION COMENTARIO*/
 COMMENTS 
-    : linecomment       {$$ = new Comment('Line', _$.first_line, _$.first_column);} 
-    | multilinecomment  {$$ = new Comment('Multi line', _$.first_line, _$.first_column);} 
+    : linecomment       {$$ = new Comment('Line', this._$.first_line, this._$.first_column);} 
+    | multilinecomment  {$$ = new Comment('Multi line', this._$.first_line, this._$.first_column);} 
     ;
 
 /* VARIABLES */
 
 DECLARATION 
-    : TYPE identifier VALUE                        {$$ = new Declaration($1, $2, $3, $1.first_line, _$.first_column);}  
-    | TYPE identifier '(' PARAMETERS ')'        '{' INSTRUCCIONS '}' {$$ = new Function($1, $2, [$4], $7, _$.first_line, _$.first_column);} 
+    : TYPE identifier VALUE                        {$$ = new Declaration($1, $2, $3, this._$.first_line, this._$.first_column);}  
+    | TYPE identifier '(' PARAMETERS ')'        '{' INSTRUCCIONS '}' {$$ = new Function($1, $2, [$4], $7, this._$.first_line, this._$.first_column);} 
     ;
 
 DECLARATION2 
-    : TYPE identifier VALUE                        {$$ = new Declaration($1, $2, $3, $1.first_line, _$.first_column);}  
+    : TYPE identifier VALUE                        {$$ = new Declaration($1, $2, $3, this._$.first_line, this._$.first_column);}  
     ;
 
 VALUE 
@@ -242,13 +250,13 @@ MORE_VALUES
 
 
 ASIGNATION 
-    : identifier '=' EXPRESION  ';'              {$$ = new Assignation($1, $3, _$.first_line, _$.first_column);}
-    | identifier '(' FUNCTION_PARAMETERS ')' ';' {$$ = new CallFunction($1, [$3], _$.first_line, _$.first_column);}
+    : identifier '=' EXPRESION  ';'              {$$ = new Assignation($1, $3, this._$.first_line, this._$.first_column);}
+    | identifier '(' FUNCTION_PARAMETERS ')' ';' {$$ = new CallFunction($1, [$3], this._$.first_line, this._$.first_column);}
     ;
 
 
 ASIGNATION3 
-    : identifier '=' EXPRESION  ';'              {$$ = new Assignation($1, $3, _$.first_line, _$.first_column);}
+    : identifier '=' EXPRESION  ';'              {$$ = new Assignation($1, $3, this._$.first_line, this._$.first_column);}
     ;
 
 MORE_ELEMENTS 
@@ -260,8 +268,8 @@ MORE_ELEMENTS2
     | //epsilon                                 
     ;
 ASIGNATION2 
-    : identifier '=' EXPRESION                   {$$ = new Assignation($1, $3, _$.first_line, _$.first_column);}
-    | identifier                                 {$$ = new Assignation($1, null, _$.first_line, _$.first_column);}
+    : identifier '=' EXPRESION                   {$$ = new Assignation($1, $3, this._$.first_line, this._$.first_column);}
+    | identifier                                 {$$ = new Assignation($1, null, this._$.first_line, this._$.first_column);}
     ;
 
 
@@ -275,7 +283,7 @@ PARAMETERS
     ;
 
 PARAMETER 
-    : TYPE identifier MORE_PARAMETER        {$$ = new Declaration($1, $2, null, _$.first_line, _$.first_column);}
+    : TYPE identifier MORE_PARAMETER        {$$ = new Declaration($1, $2, null, this._$.first_line, this._$.first_column);}
     ;
 MORE_PARAMETER 
     : ',' TYPE identifier MORE_PARAMETER
@@ -287,7 +295,7 @@ FUNCTION_PARAMETERS
     ;
 
 FUNCTION_PARAMETER 
-    : identifier MORE_FUNCTION_PARAMETER         {$$ = new Identifier($1, _$.first_line, _$.first_column);}
+    : identifier MORE_FUNCTION_PARAMETER         {$$ = new Identifier($1, this._$.first_line, this._$.first_column);}
     | /*EPSILON*/                                {$$ = null;}
     ;
 MORE_FUNCTION_PARAMETER 
@@ -297,15 +305,15 @@ MORE_FUNCTION_PARAMETER
 
 /* SECCION METODO*/
 VOID_METHOD 
-    : 'void' 'main' '(' PARAMETERS ')'     '{' INSTRUCCIONS '}'    {$$ = new Function('void', 'main', [$4], $6, _$.first_line, _$.first_column);} 
-    | 'void' identifier '(' PARAMETERS ')' '{' INSTRUCCIONS '}'    {$$ = new Function('void', $2, [$4], $6, _$.first_line, _$.first_column);}
+    : 'void' 'main' '(' PARAMETERS ')'     '{' INSTRUCCIONS '}'    {$$ = new Function('void', 'main', [$4], $6, this._$.first_line, this._$.first_column);} 
+    | 'void' identifier '(' PARAMETERS ')' '{' INSTRUCCIONS '}'    {$$ = new Function('void', $2, [$4], $6, this._$.first_line, this._$.first_column);}
     ;
 
 /*SECCION IF*/
 
-IF : 'if' IF_CONDITION INSTRUCCIONS_BLOCK                           {$$ = new If($2, $3, [], _$.first_line, _$.first_column);}
-   | 'if' IF_CONDITION INSTRUCCIONS_BLOCK 'else' INSTRUCCIONS_BLOCK {$$ = new If($2, $3, $5, _$.first_line, _$.first_column);}
-   | 'if' IF_CONDITION INSTRUCCIONS_BLOCK 'else' IF                 {$$ = new If($2, $3, [$5], _$.first_line, _$.first_column);}
+IF : 'if' IF_CONDITION INSTRUCCIONS_BLOCK                           {$$ = new If($2, $3, [], this._$.first_line, this._$.first_column);}
+   | 'if' IF_CONDITION INSTRUCCIONS_BLOCK 'else' INSTRUCCIONS_BLOCK {$$ = new If($2, $3, $5, this._$.first_line, this._$.first_column);}
+   | 'if' IF_CONDITION INSTRUCCIONS_BLOCK 'else' IF                 {$$ = new If($2, $3, [$5], this._$.first_line, this._$.first_column);}
    ;
 
 IF_CONDITION 
@@ -319,19 +327,19 @@ INSTRUCCIONS_BLOCK
 
 /* SECCION WHILE*/
 
-WHILE : 'while' IF_CONDITION INSTRUCCIONS_BLOCK {$$ = new While($2, $3, _$.first_line, _$.first_column);}
+WHILE : 'while' IF_CONDITION INSTRUCCIONS_BLOCK {$$ = new While($2, $3, this._$.first_line, this._$.first_column);}
       ;
 
 /* SECCION DO WHILE*/
 
 DOWHILE 
-    : 'do'  INSTRUCCIONS_BLOCK 'while' IF_CONDITION ';' {$$ = new DoWhile($2, $4, _$.first_line, _$.first_column);}
+    : 'do'  INSTRUCCIONS_BLOCK 'while' IF_CONDITION ';' {$$ = new DoWhile($2, $4, this._$.first_line, this._$.first_column);}
     ;
 
 /* SECCION FOR*/
 
 FOR 
-    : 'for' '(' TYPE_FOR ';' EXPRESION ';' INCREMENT_DECREMENT  ')' INSTRUCCIONS_BLOCK  {$$ = new For($3, $5, $7, $9, _$.first_line, _$.first_column);}
+    : 'for' '(' TYPE_FOR ';' EXPRESION ';' INCREMENT_DECREMENT  ')' INSTRUCCIONS_BLOCK  {$$ = new For($3, $5, $7, $9, this._$.first_line, this._$.first_column);}
     ;
 
 TYPE_FOR 
@@ -340,25 +348,25 @@ TYPE_FOR
     ;
 
 DECLARATION_FOR 
-    : TYPE identifier  '=' EXPRESION        {$$ = new Declaration($1, $2, $4, _$.first_line, _$.first_column);}
+    : TYPE identifier  '=' EXPRESION        {$$ = new Declaration($1, $2, $4, this._$.first_line, this._$.first_column);}
     ;
-ASIGNATION_FOR : identifier '=' EXPRESION   {$$ = new Assignation($1, $3, _$.first_line, _$.first_column);}
+ASIGNATION_FOR : identifier '=' EXPRESION   {$$ = new Assignation($1, $3, this._$.first_line, this._$.first_column);}
     ;
 
 INCREMENT_DECREMENT 
-    : identifier '+' '+'        {$$ = new Increment($1, $2, $3, _$.first_line, _$.first_column);}
-    | identifier '-' '-'        {$$ = new Decrement($1, $2, $3, _$.first_line, _$.first_column);}
+    : identifier '+' '+'        {$$ = new Increment($1, $2, $3, this._$.first_line, this._$.first_column);}
+    | identifier '-' '-'        {$$ = new Decrement($1, $2, $3, this._$.first_line, this._$.first_column);}
     | identifier '*' '-' number {$$ = [];}
     ;
 
 /* SECCION SWITCH*/
 
 SWITCH
-    : 'switch' IF_CONDITION '{'  CASE DEFAULT  '}' {$$ = new Switch($2, [$4], $5, _$.first_line, _$.first_column);}
+    : 'switch' IF_CONDITION '{'  CASE DEFAULT  '}' {$$ = new Switch($2, [$4], $5, this._$.first_line, this._$.first_column);}
     ;
 
 CASE 
-    : 'case' EXPRESION ':' INSTRUCCIONS 'break' ';' MORE_CASES {$$ = new Case($2, $4, _$.first_line, _$.first_column);}
+    : 'case' EXPRESION ':' INSTRUCCIONS 'break' ';' MORE_CASES {$$ = new Case($2, $4, this._$.first_line, this._$.first_column);}
     ;
 
 MORE_CASES
@@ -366,7 +374,7 @@ MORE_CASES
     | //epsilon
     ;
 DEFAULT 
-    : 'default' ':' INSTRUCCIONS {$$ = new Default($3, _$.first_line, _$.first_column);}
+    : 'default' ':' INSTRUCCIONS {$$ = new Default($3, this._$.first_line, this._$.first_column);}
     ;
 
 
@@ -375,8 +383,8 @@ PRINT
     : 'System' '.' 'out' '.' TYPE_PRINT 
     ;
 TYPE_PRINT
-    : 'print'   '(' EXPRESION ')' ';'   {$$ = new Print($3, _$.first_line, _$.first_column);}
-    | 'println' '(' EXPRESION ')' ';'   {$$ = new Print($3, _$.first_line, _$.first_column);}
+    : 'print'   '(' EXPRESION ')' ';'   {$$ = new Print($3, this._$.first_line, this._$.first_column);}
+    | 'println' '(' EXPRESION ')' ';'   {$$ = new Print($3, this._$.first_line, this._$.first_column);}
     ;
 
 /*  SECCION LLAMADA A FUNCIONES */
@@ -385,26 +393,26 @@ CALL_FUNCTION
     ;
 
 EXPRESION 
-    : '-' EXPRESION /*%prec UMENOS*/	   { $$ = new ArithmeticExpression($1, null, '-', _$.first_line, _$.first_column); }
-    | EXPRESION '+' EXPRESION		       { $$ = new ArithmeticExpression($1, $3, '+', _$.first_line, _$.first_column); }
-    | EXPRESION '-' EXPRESION		       { $$ = new ArithmeticExpression($1, $3, '-', _$.first_line, _$.first_column); }
-    | EXPRESION '*' EXPRESION		       { $$ = new ArithmeticExpression($1, $3, '*', _$.first_line, _$.first_column); }
-    | EXPRESION '/' EXPRESION	           { $$ = new ArithmeticExpression($1, $3, '/', _$.first_line, _$.first_column); }
-    | EXPRESION '>=' EXPRESION	           { $$ = new RelationalExpression($1, $3, '>=', _$.first_line, _$.first_column); }
-    | EXPRESION '<' EXPRESION		       { $$ = new RelationalExpression($1, $3, '<', _$.first_line, _$.first_column); }
-    | EXPRESION '==' EXPRESION	           { $$ = new RelationalExpression($1, $3, '==', _$.first_line, _$.first_column); }
-    | EXPRESION '>' EXPRESION		       { $$ = new RelationalExpression($1, $3, '>', _$.first_line, _$.first_column); }
-    | EXPRESION '<=' EXPRESION	           { $$ = new RelationalExpression($1, $3, '<=', _$.first_line, _$.first_column); }
-    | EXPRESION '!=' EXPRESION	           { $$ = new RelationalExpression($1, $3, '!=', _$.first_line, _$.first_column); }
-    | '!' EXPRESION	                       { $$ = new LogicExpression($2, null, '!', _$.first_line, _$.first_column); }
-    | EXPRESION '||' EXPRESION	           { $$ = new LogicExpression($1, $3, '&&', _$.first_line, _$.first_column); }
-    | EXPRESION '&&' EXPRESION	           { $$ = new LogicExpression($1, $3, '||', _$.first_line, _$.first_column); }
-    | 'decimal'				               { $$ = new Expression(new DataType('int'), Number($1), _$.first_line, _$.first_column); }
-    | 'number'				               { $$ = new Expression(new DataType('int'), Number($1), _$.first_line, _$.first_column); }
-    | 'true'				               { $$ = new Expression(new DataType('boolean'), true, _$.first_line, _$.first_column); }
-    | 'false'				               { $$ = new Expression(new DataType('boolean'), false, _$.first_line, _$.first_column); }
-    | STRING_LITERAL			           { $$ = new Expression(new DataType('string'), $1.replace(/\"/g,""), _$.first_line, _$.first_column); }
-    | char_literal			               { $$ = new Expression(new DataType('char'), $1.replace(/\'/g,""), _$.first_line, _$.first_column); }*/
-    | identifier		                   { $$ = new Identifier($1, _$.first_line, _$.first_column); }
+    : '-' EXPRESION /*%prec UMENOS*/	   { $$ = new ArithmeticExpression($1, null, '-', this._$.first_line, this._$.first_column); }
+    | EXPRESION '+' EXPRESION		       { $$ = new ArithmeticExpression($1, $3, '+', this._$.first_line, this._$.first_column); }
+    | EXPRESION '-' EXPRESION		       { $$ = new ArithmeticExpression($1, $3, '-', this._$.first_line, this._$.first_column); }
+    | EXPRESION '*' EXPRESION		       { $$ = new ArithmeticExpression($1, $3, '*', this._$.first_line, this._$.first_column); }
+    | EXPRESION '/' EXPRESION	           { $$ = new ArithmeticExpression($1, $3, '/', this._$.first_line, this._$.first_column); }
+    | EXPRESION '>=' EXPRESION	           { $$ = new RelationalExpression($1, $3, '>=', this._$.first_line, this._$.first_column); }
+    | EXPRESION '<' EXPRESION		       { $$ = new RelationalExpression($1, $3, '<', this._$.first_line, this._$.first_column); }
+    | EXPRESION '==' EXPRESION	           { $$ = new RelationalExpression($1, $3, '==', this._$.first_line, this._$.first_column); }
+    | EXPRESION '>' EXPRESION		       { $$ = new RelationalExpression($1, $3, '>', this._$.first_line, this._$.first_column); }
+    | EXPRESION '<=' EXPRESION	           { $$ = new RelationalExpression($1, $3, '<=', this._$.first_line, this._$.first_column); }
+    | EXPRESION '!=' EXPRESION	           { $$ = new RelationalExpression($1, $3, '!=', this._$.first_line, this._$.first_column); }
+    | '!' EXPRESION	                       { $$ = new LogicExpression($2, null, '!', this._$.first_line, this._$.first_column); }
+    | EXPRESION '||' EXPRESION	           { $$ = new LogicExpression($1, $3, '&&', this._$.first_line, this._$.first_column); }
+    | EXPRESION '&&' EXPRESION	           { $$ = new LogicExpression($1, $3, '||', this._$.first_line, this._$.first_column); }
+    | 'decimal'				               { $$ = new Expression(new DataType('int'), Number($1), this._$.first_line, this._$.first_column); }
+    | 'number'				               { $$ = new Expression(new DataType('int'), Number($1), this._$.first_line, this._$.first_column); }
+    | 'true'				               { $$ = new Expression(new DataType('boolean'), true, this._$.first_line, this._$.first_column); }
+    | 'false'				               { $$ = new Expression(new DataType('boolean'), false, this._$.first_line, this._$.first_column); }
+    | STRING_LITERAL			           { $$ = new Expression(new DataType('string'), $1.replace(/\"/g,""), this._$.first_line, this._$.first_column); }
+    | char_literal			               { $$ = new Expression(new DataType('char'), $1.replace(/\'/g,""), this._$.first_line, this._$.first_column); }*/
+    | identifier		                   { $$ = new Identifier($1, this._$.first_line, this._$.first_column); }
     | '(' EXPRESION ')'		               { $$ = $2; }                          
     ;

@@ -5,7 +5,7 @@ class Class{
     /**
      * 
      * @constructor Crea un nuevo tipo con el tipo primitivo 
-     * @param id Tipo seleccionado para la variable
+     * @param id IDENTIFICADOR DE LA CLASE
      * @param list Lista de instrucciones internas, ifs, fors, variables etc
      * 
      */

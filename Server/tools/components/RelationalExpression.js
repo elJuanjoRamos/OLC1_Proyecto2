@@ -9,6 +9,7 @@ class RelationalExpression {
      * @param column columna de la operacion
      */
     constructor(lft, rgt, op, l, c) {
+        this.name = "RelationalExpression";
         this.line  = l;
         this.column = c;
         this.left = lft;

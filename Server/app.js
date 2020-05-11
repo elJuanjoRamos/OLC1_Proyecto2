@@ -7,8 +7,29 @@ var bodyParser = require("body-parser");
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-
+var ex = require("./tools/components/Exception")
 var api = "/api/v1/server";
+
+
+
+
+/*
+const lexer = require("./tools/grammar");
+
+
+var tree = lexer.parse("int a = 0; int b = 0 int c = 0; \nif(a<) { int b = 0} int d = 5; int f = 7;");
+
+console.log(tree)
+
+*/
+/*tree.instructions.forEach(element => {
+  if(element.name == "Exception"){
+    console.log("g")
+  }
+  console.log(element)
+});*/
+
+
 
 //QUE INSTALAR
 //npm install jison

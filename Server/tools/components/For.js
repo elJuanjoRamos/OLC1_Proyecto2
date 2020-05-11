@@ -16,6 +16,7 @@ class For {
      * @param column Columna de la sentencia 
      */
     constructor(aod, cond, incOrDec, lst, l, c) {
+        this.name = "For"
         this.assignationOrDeclaration = aod;
         this.condition = cond;
         this.incrementDecrement = incOrDec;

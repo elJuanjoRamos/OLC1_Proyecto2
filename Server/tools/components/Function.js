@@ -10,6 +10,7 @@ class Function {
      
      */
     constructor(t, i,params , lst,  c, l) {
+        this.name = "Function";
         this.type = t;
         this.id = i;
         this.list = lst;

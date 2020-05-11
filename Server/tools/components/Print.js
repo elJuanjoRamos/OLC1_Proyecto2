@@ -6,6 +6,7 @@ class Print {
      * @param expresion Linea del break
      */
     constructor(par, l, c) {
+        this.name = "Print";
         this.param = par;
         this.line = l;
         this.expresion= c;

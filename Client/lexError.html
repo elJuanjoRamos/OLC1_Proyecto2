@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title> Repote de Errores Lexicos</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <script src='main.js'></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head><body>
+  <nav class="navbar navbar-light bg-light">
+    <span class="navbar-brand mb-0 h1">Compiladores 1</span>
+  </nav><div class="container">
+    <div class="jumbotron jumbotron-fluid">
+      <div class="container">
+        <h1 class="display-4"> Archivo de entrada</h1>
+        <p class="lead">Listado de errores del archivo de entrada  detectados por el analizador</p>
+      </div>
+    </div>
+    <div class="row">
+    <table id="data"  cellspacing="0" style="width: 100 %" class="table table-striped table-bordered table-sm">
+      <thead class="thead-dark">
+        <tr>
+<th scope ="col">No</th>
+          <th scope="col">Error</th>
+        </tr>
+      </thead><tbody><tr>
+     <th scope="row">0</th>
+     <td>ERROR LEXICO: Simbolo desconocido, # Linea:1, Columna:8</td>
+</tr><tr>
+     <th scope="row">1</th>
+     <td>ERROR LEXICO: Simbolo desconocido, % Linea:3, Columna:1</td>
+</tr><tr>
+     <th scope="row">2</th>
+     <td>ERROR LEXICO: Simbolo desconocido, $ Linea:3, Columna:2</td>
+</tr><tr>
+     <th scope="row">3</th>
+     <td>ERROR LEXICO: Simbolo desconocido, ^ Linea:5, Columna:1</td>
+</tr><tr>
+     <th scope="row">4</th>
+     <td>ERROR LEXICO: Simbolo desconocido, $ Linea:5, Columna:2</td>
+</tr><tr>
+     <th scope="row">5</th>
+     <td>ERROR LEXICO: Simbolo desconocido, % Linea:5, Columna:3</td>
+</tr><tr>
+     <th scope="row">6</th>
+     <td>ERROR LEXICO: Simbolo desconocido, $ Linea:7, Columna:1</td>
+</tr><tr>
+     <th scope="row">7</th>
+     <td>ERROR LEXICO: Simbolo desconocido, $ Linea:7, Columna:2</td>
+</tr><tr>
+     <th scope="row">8</th>
+     <td>ERROR LEXICO: Simbolo desconocido, # Linea:7, Columna:3</td>
+</tr></tbody>
+    </table>
+</div>
+  </div>  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" ></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js" ></script>
+<script>$(document).ready(function () { $('#data').DataTable({ "aLengthMenu" : [[5, 10, 25, -1], [5, 10, 25, "All"]], "iDisplayLength" : 5});}); </script></body></html>

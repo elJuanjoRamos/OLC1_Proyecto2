@@ -5,7 +5,7 @@ BR              \r\n|\n|\r
 
 %%
 
-"/*"(.|\n|\r)*?"*/"             return 'COMENTARIO_MULTI_LINEA'
+"/*"(.|\n|\r)*?"*/"            return 'COMENTARIO_MULTI_LINEA'
 "//"({ID}|{NUMBER})*?          return 'COMENTARIO_LINEA';
 
 {BR}+                           /* */
@@ -46,6 +46,9 @@ BR              \r\n|\n|\r
 "]"                             return 'PAR_DER';
 '"'                             return 'COMILLA';
 "'"                             return 'COMILLA_SIMPLE'
+"int"                           return 'PR_int'
+
+
 .                               return 'LEXICAL_ERROR'
 <*><<EOF>>                      return 'EOF';
 %%

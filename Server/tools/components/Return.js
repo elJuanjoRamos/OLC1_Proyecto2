@@ -7,6 +7,7 @@ class Return {
      * @param identifier Columna del break
      */
     constructor(id, par, l, c) {
+        this.name = "Return"
         this.identifier = id;
         this.param = par;
         this.line = l;

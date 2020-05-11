@@ -6,6 +6,7 @@ class Exception {
      * @param column Columna donde ocurrio el error
      */
     constructor(type, description, line, column) {
+        this.name = "Exception"
         this.type = type;
         this.description = description;
         this.line = line;

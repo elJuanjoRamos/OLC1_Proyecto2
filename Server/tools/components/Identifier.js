@@ -8,6 +8,7 @@ class Identifier {
      * @param column Columna
      */
     constructor(identifier, l, c) {
+        this.name = "Identifier";
         this.id = identifier;
         this.line = l;
         this.column = c;

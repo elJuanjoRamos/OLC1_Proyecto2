@@ -4,8 +4,7 @@ class LexicalController {
     
     arrayToken = [];
     arrayError = [];
-
-
+    hayError = false;
     constructor(){
         console.log("Lexical Controller");
     }
@@ -15,20 +14,19 @@ class LexicalController {
     }
 
     addError(id, des, line, col){
+        this.hayError = true;
         this.arrayError.push(new tok(id, des, line, col));
     }
-
+    getArrayError(){
+        return this.arrayError
+    }
     getError(){
-        if(this.arrayError.length >= 1){
-            return true;
-        }
-        return false;
+        return this.hayError
     }
-
-    hello(){
-        console.log("hola");
-    }
-    
+    clear(){
+        this.arrayError = []
+        this.arrayToken = []
+    }    
 }
 
 

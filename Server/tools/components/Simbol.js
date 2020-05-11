@@ -11,6 +11,7 @@ class Simbol {
      * @param value Valor de la variable u objeto completo de la función
      */
     constructor(type, identifier, value) {
+        this.name = "Simbol"
         this.type = type;
         this.identifier = identifier;
         this.value = value;

@@ -6,6 +6,7 @@ class Import {
      * @param column Columna de la sentencia if
      */
     constructor(identifier, line, column) {
+        this.name = "Import"
         this.identifier = identifier;
         this.line = line;
         this.column = column;
