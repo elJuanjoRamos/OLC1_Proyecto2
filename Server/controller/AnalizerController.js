@@ -9,10 +9,9 @@ class AnalizerController {
 
 
     armarExcepciones(list){
-        console.log("la lista que llego es")
+        console.log("lista que llega")
         console.log(list)
-
-        if(list != undefined){
+        if(list != undefined && list != []){
             
             //Recorro y guardo los errores
             list.forEach(e => {

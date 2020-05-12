@@ -27,14 +27,13 @@ router.get('/lexerror', (req, res) => {
 
 
 router.post('/analizar', function (req, res, next) {
-
+  
   const { entrada, consola } = req.body;
   lexController.clear();
   anController.clear();
   var array = [];
 
   lexer.setInput(entrada);
-
   while (!lexer.done) {
     token = lexer.lex();
     colum = lexer.yylloc.first_column;
@@ -72,11 +71,7 @@ router.post('/analizar', function (req, res, next) {
                                     
                   if(element.name == "If"){
                       anController.armarExcepciones(element.list)
-                      element.ElseList.forEach(e => {
-                        console.log("e")
-                        console.log(e);
-                        //anController.armarExcepciones(e);    
-                    });
+                      anController.armarExcepciones(element.ElseList);
                   } else {
                       anController.armarExcepciones(element.list) 
                   }

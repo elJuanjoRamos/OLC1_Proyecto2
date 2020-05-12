@@ -11,35 +11,25 @@ var ex = require("./tools/components/Exception")
 var api = "/api/v1/server";
 
 
-
-
 /*
+const analizer = require("./controller/AnalizerController");
+
+var a = new analizer();
+
 const lexer = require("./tools/grammar");
-var analizerController = require('./controller/AnalizerController');
 
-var anController = new analizerController();
+var tree = lexer.parse("import a; class a { if (num1 > num2){ int a = 0; int b= 0; } else if(a) { int C = 0; } else{ int e = 0; } }");
 
-var tree = lexer.parse("import a ; class a{  int a = 0; for(a = 0; a<65; a++) { int b }    }");
-console.log(tree.instructions[0])
-tree.instructions[0].list.forEach(e => {
-  if(e.name == "Exception"){
-    //array.push(e.description)
-  } else {
-    if(e.name == "For"|| e.name == "Switch" || e.name == "Case" 
-                || e.name == "Do" || e.name == "While"){
-                  anController.armarExcepciones(e.list)
-                }
-   
-  }
-});
-console.log("pinteado")
-console.log(anController.getArray());*/
 
-/*tree.instructions.forEach(element => {
-  if(element.name == "Exception"){
-    console.log("g")
-  }
+
+tree.instructions[0].list.forEach(element => {
   console.log(element)
+  if(element.name == "If"){
+    
+    a.armarExcepciones(element.list)
+    a.armarExcepciones(element.ElseList)
+    
+  }
 });*/
 
 

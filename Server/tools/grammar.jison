@@ -7,7 +7,7 @@
     const {Class}                   = require('./components/Class');
     const {Import}                  = require('./components/Import');
     const {If}                      = require('./components/If');
-    const {Else}                      = require('./components/Else');
+    const {Else}                    = require('./components/Else');
     const {Identifier}              = require('./components/Identifier');
     const {Switch}                  = require('./components/Switch');
     const {Case}                    = require('./components/Case');
@@ -33,22 +33,20 @@
 %lex
 %options case-insensitive
 number                  [0-9]+
-decimal                 [0-9]+"."[0-9]+
+decimal                 [0-9][0-9]* "."[0-9][0-9]*
 stringliteral           (\"[^"]*\")
-charliteral             (\'[^"]*\')
+charliteral             (\'[a-zA-Z_]\')
 identifier              ([a-zA-Z_])[a-zA-Z0-9_]*
+BR                      \r\n|\n|\r
 multilinecomment        "/*"(.|\n|\r)*?"*/"
-linecomment             "//"(.|{identifier}|{NUMBER}|{decimal})*?
-
-
-
+linecomment             ("/""/")("/")*(.|{identifier}|{number}|{decimal}|{stringliteral})*
 
 %%
 
 \s+                   /* skip whitespace */
 
-{number}              return 'number' 
 {decimal}             return 'decimal' 
+{number}              return 'number' 
 {stringliteral}       return 'STRING_LITERAL'
 {multilinecomment}    return 'multilinecomment'
 {charliteral}         return 'char_literal'
@@ -112,8 +110,12 @@ linecomment             "//"(.|{identifier}|{NUMBER}|{decimal})*?
 %left 'else'
 %left '||'
 %left '&&'
-%left '==', '!='
-%left '>=', '<=', '<', '>'
+%left '=='
+%left '!='
+%left '>='
+%left '<='
+%left '<'
+%left '>'
 %left '+' '-'
 %left '*' '/'
 %right '!'
@@ -124,7 +126,7 @@ linecomment             "//"(.|{identifier}|{NUMBER}|{decimal})*?
 %%
 
 INIT     
-    :/* empty */     { $$ = ''; console.log("empty"); } 
+    :/* empty */            { $$ = ''; console.log("empty"); } 
     | INSTRUCCIONS EOF      {$$ = new Tree($1); return $$;}
     ;
 
@@ -232,23 +234,26 @@ COMMENTS
 /* VARIABLES */
 
 DECLARATION 
-    : TYPE identifier VALUE                        {$$ = new Declaration($1, $2, $3, this._$.first_line, this._$.first_column);}  
+    : TYPE identifier VALUE              ';'     {$$ = new Declaration($1, $2, $3, this._$.first_line, this._$.first_column);}  
     | TYPE identifier '(' PARAMETERS ')'        '{' INSTRUCCIONS '}' {$$ = new Function($1, $2, [$4], $7, this._$.first_line, this._$.first_column);} 
     ;
 
+
 DECLARATION2 
-    : TYPE identifier VALUE                        {$$ = new Declaration($1, $2, $3, this._$.first_line, this._$.first_column);}  
+    : TYPE identifier VALUE             ';'      {$$ = new Declaration($1, $2, $3, this._$.first_line, this._$.first_column);}  
     ;
 
 VALUE 
     : '=' EXPRESION MORE_VALUES     {$$ = $2}
-    | ';'                           {$$ = null;}
     | ',' MORE_ELEMENTS             {$$ = null;}
+    | /*epsilon*/                   {$$ = null;}
     ;
 
+
+
 MORE_VALUES
-    : ';'
-    | ',' MORE_ELEMENTS ';'    
+    : ',' MORE_ELEMENTS   
+    | //epsilon
     ;
 
 
@@ -307,14 +312,14 @@ MORE_FUNCTION_PARAMETER
 
 /* SECCION METODO*/
 VOID_METHOD 
-    : 'void' 'main' '(' PARAMETERS ')'     '{' INSTRUCCIONS '}'    {$$ = new Function('void', 'main', [$4], $6, this._$.first_line, this._$.first_column);} 
-    | 'void' identifier '(' PARAMETERS ')' '{' INSTRUCCIONS '}'    {$$ = new Function('void', $2, [$4], $6, this._$.first_line, this._$.first_column);}
+    : 'void' 'main' '('  ')'     '{' INSTRUCCIONS '}'    {$$ = new Function('void', 'main', [], $6, this._$.first_line, this._$.first_column);} 
+    | 'void' identifier '(' PARAMETERS ')' '{' INSTRUCCIONS '}'    {$$ = new Function('void', $2, [$4], $7, this._$.first_line, this._$.first_column);}
     ;
 
 /*SECCION IF*/
 
 IF : 'if' IF_CONDITION INSTRUCCIONS_BLOCK                           {$$ = new If($2, $3, [], this._$.first_line, this._$.first_column);}
-   | 'if' IF_CONDITION INSTRUCCIONS_BLOCK 'else' INSTRUCCIONS_BLOCK {$$ = new If($2, $3, new Else($5,this._$.first_line, this._$.first_column), this._$.first_line, this._$.first_column);}
+   | 'if' IF_CONDITION INSTRUCCIONS_BLOCK 'else' INSTRUCCIONS_BLOCK {$$ = new If($2, $3, [new Else($5,this._$.first_line, this._$.first_column)], this._$.first_line, this._$.first_column);}
    | 'if' IF_CONDITION INSTRUCCIONS_BLOCK 'else' IF                 {$$ = new If($2, $3, [$5], this._$.first_line, this._$.first_column);}
    ;
 
@@ -382,7 +387,7 @@ DEFAULT
 
 /* SECCION PRINT */
 PRINT
-    : 'System' '.' 'out' '.' TYPE_PRINT 
+    : 'System' '.' 'out' '.' TYPE_PRINT { $$ = $5 }
     ;
 TYPE_PRINT
     : 'print'   '(' EXPRESION ')' ';'   {$$ = new Print($3, this._$.first_line, this._$.first_column);}
@@ -409,7 +414,7 @@ EXPRESION
     | '!' EXPRESION	                       { $$ = new LogicExpression($2, null, '!', this._$.first_line, this._$.first_column); }
     | EXPRESION '||' EXPRESION	           { $$ = new LogicExpression($1, $3, '&&', this._$.first_line, this._$.first_column); }
     | EXPRESION '&&' EXPRESION	           { $$ = new LogicExpression($1, $3, '||', this._$.first_line, this._$.first_column); }
-    | 'decimal'				               { $$ = new Expression(new DataType('int'), Number($1), this._$.first_line, this._$.first_column); }
+    | 'decimal'				               { $$ = new Expression(new DataType('double'), Number($1), this._$.first_line, this._$.first_column); }
     | 'number'				               { $$ = new Expression(new DataType('int'), Number($1), this._$.first_line, this._$.first_column); }
     | 'true'				               { $$ = new Expression(new DataType('boolean'), true, this._$.first_line, this._$.first_column); }
     | 'false'				               { $$ = new Expression(new DataType('boolean'), false, this._$.first_line, this._$.first_column); }

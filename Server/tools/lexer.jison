@@ -5,8 +5,8 @@ BR              \r\n|\n|\r
 
 %%
 
-"/*"(.|\n|\r)*?"*/"            return 'COMENTARIO_MULTI_LINEA'
-"//"({ID}|{NUMBER})*?          return 'COMENTARIO_LINEA';
+"/*"(.|\n|\r)*?"*/"                                                         return 'COMENTARIO_MULTI_LINEA'
+("/""/")("/")*(.|{identifier}|{number}|{decimal}|{stringliteral})*          return 'COMENTARIO_LINEA';
 
 {BR}+                           /* */
 \s+                             /* */
