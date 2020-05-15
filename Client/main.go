@@ -183,7 +183,7 @@ func EndPoint(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println(t)
+		fmt.Println(t.AST)
 		text := ""
 		for i, s := range t.Console {
 			fmt.Println(i)

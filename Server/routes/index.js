@@ -24,7 +24,9 @@ router.get('/', (req, res) => {
 router.get('/lexerror', (req, res) => {
   res.json(lexController.getArrayError())
 })
-
+router.get('/sinterror', (req, res) => {
+  res.json(lexController.getArrayError())
+})
 
 router.post('/analizar', function (req, res, next) {
   
@@ -40,7 +42,7 @@ router.post('/analizar', function (req, res, next) {
     line = lexer.yylloc.first_line;
     if(token === "LEXICAL_ERROR"){
       lexController.addError(lexer.yytext, 'LEXICAL_ERROR', line, colum);
-      array.push("ERROR LEXICO: Simbolo desconocido, " + lexer.yytext + " Linea:" + line + ", Columna:" + colum);
+      array.push("ERROR LEXICO: Simbolo desconocido, " + lexer.yytext + " Linea:" + line + ", Columna:" + colum+"\n");
     } else {
       lexController.addToken(lexer.yytext, token, line, colum);
     }
@@ -53,13 +55,10 @@ router.post('/analizar', function (req, res, next) {
     //HACE EL PARSER
     var tree = parser.parse(entrada);
     
-    console.log(tree.instructions[0])
-
-
     //HAGO UN FOREACH EN LAS ISTRUCCIONES PARA VER SI HAY ALGUN ERROR
-    tree.instructions[0].list.forEach(element => {
+    tree.instructions.list.forEach(element => {
         if(element.name == "Exception"){
-          //SE AGREGA EL ERROR AL ARRAY
+          lexController.addError(element.description);
           array.push(element.description)
         } else {
           
@@ -67,7 +66,7 @@ router.post('/analizar', function (req, res, next) {
           //SI EN LAS INSTRUCCIONES EXISTEN INSTRUCCIONES ANIDADAS 
           // SE ENVIA A UN METODO RECURSIVO PARA BUSCAR ERRORESS
           if(element.name == "For"|| element.name == "Switch" || element.name == "Case" || element.name == "Do"
-                 || element.name == "While"  || element.name == "If"|| element.name == "Else"){
+                 || element.name == "While"|| element.name == "Function"  || element.name == "If"|| element.name == "Else"){
                                     
                   if(element.name == "If"){
                       anController.armarExcepciones(element.list)
@@ -82,10 +81,10 @@ router.post('/analizar', function (req, res, next) {
     //SE HACE UN FOREACH AL ARRAY QUE RETORNA EL CONTROLADOR QUE BUSCO 
     //LOS ERRORES EN LAS INSTRUCCIONES ANIDADAS
     anController.getArray().forEach(element => {
-        array.push(element);
+      lexController.addError(element.description);
+      array.push(element);
     });
-
-    res.json({ entrada: entrada, consola: array, ast: tree, type : "sintactico" })
+    res.json({ entrada: entrada, consola: array, ast: tree.instructions, type : "sintactico" })
   }
 });
 

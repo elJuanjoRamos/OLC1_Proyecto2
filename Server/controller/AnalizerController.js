@@ -9,8 +9,6 @@ class AnalizerController {
 
 
     armarExcepciones(list){
-        console.log("lista que llega")
-        console.log(list)
         if(list != undefined && list != []){
             
             //Recorro y guardo los errores
@@ -19,7 +17,7 @@ class AnalizerController {
                     this.arrayErrores.push(e.description)
                 } else {
                     if(e.name == "For"|| e.name == "Switch" || e.name == "Case" 
-                    || e.name == "Do" || e.name == "While" || e.name == "Else"){
+                    || e.name == "Do" || e.name == "While"|| e.name == "Function" || e.name == "Else"){
                         this.armarExcepciones(e.list);
                     }
 
