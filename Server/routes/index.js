@@ -21,10 +21,11 @@ router.get('/', (req, res) => {
   });
 })
 router.get('/lexerror', (req, res) => {
-  res.json(lexController.getArrayError())
+  res.json(lexController.getArrayErrorLexico())
 })
 router.get('/sinterror', (req, res) => {
-  res.json(lexController.getArrayError())
+  console.log("llego")
+  res.json(lexController.getArrayErrorSintactico())
 })
 
 router.post('/analizar', function (req, res, next) {
@@ -44,7 +45,7 @@ router.post('/analizar', function (req, res, next) {
     line = lexer.yylloc.first_line;
     if(token === "LEXICAL_ERROR"){
       lexController.addError(lexer.yytext, 'LEXICAL_ERROR', line, colum);
-      array.push("ERROR LEXICO: Simbolo desconocido, " + lexer.yytext + " Linea:" + line + ", Columna:" + colum+"\n");
+      array.push("ERROR LEXICO: Simbolo desconocido, " + lexer.yytext + " Linea:" + line + ", Columna:" + colum);
     } else {
       lexController.addToken(lexer.yytext, token, line, colum);
     }
@@ -54,21 +55,24 @@ router.post('/analizar', function (req, res, next) {
     res.json({ entrada: entrada, consola: array, ast: { "name": "No tree", "list": [] }, type : "lexico" })
   } else {
     
+    array = new Array();
+    anController.clear();
     //HACE EL PARSER
     var tree = parser.parse(entrada);
-    //console.log(tree.instructions[0])
+    console.log(tree.instructions[0])
     
     
-    //Se la lista para evaluar las excepciones
+    //Se envia la lista la lista para evaluar las excepciones
     anController.armarExcepciones(tree.instructions[0].list);
 
 
     //SE HACE UN FOREACH AL ARRAY QUE RETORNA EL CONTROLADOR QUE BUSCO 
     //LOS ERRORES EN LAS INSTRUCCIONES ANIDADAS
     anController.getArray().forEach(element => {
-      lexController.addError(element.description);
-      array.push(element);
+      lexController.addErrorSintactico(element.type, element.description, element.line, element.column);
+      array.push(element.description);
     });
+    
     res.json({ entrada: entrada, consola: array, ast: tree.instructions[0], type : "sintactico" })
   }
 });

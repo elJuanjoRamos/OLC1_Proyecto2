@@ -4,6 +4,8 @@ class LexicalController {
     
     arrayToken = new Array();
     arrayError = new Array();
+    arrayErrorSintactico = new Array();
+    
     hayError = false;
     constructor(){
         console.log("Lexical Controller");
@@ -17,8 +19,15 @@ class LexicalController {
         this.hayError = true;
         this.arrayError.push(new tok(id, des, line, col));
     }
-    getArrayError(){
+    addErrorSintactico(id, des, line, col){
+        this.hayError = true;
+        this.arrayErrorSintactico.push(new tok(id, des, line, col));
+    }
+    getArrayErrorLexico(){
         return this.arrayError
+    }
+    getArrayErrorSintactico(){
+        return this.arrayErrorSintactico
     }
     getError(){
         return this.hayError
@@ -27,6 +36,7 @@ class LexicalController {
         this.hayError = false;
         this.arrayError = new Array();
         this.arrayToken = new Array();
+        this.arrayErrorSintactico = new Array();
     }    
 }
 

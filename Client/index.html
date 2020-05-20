@@ -41,7 +41,7 @@
           <div class="row">
             <div class="col-sm-8 col-md-7 py-4">
               <h4 class="text-white">About</h4>
-              <p class="text-muted">Add some information about the album below, the author, or any other background context. Make it a few sentences long so folks can pick up some informative tidbits. Then, link them off to some social networking sites or contact information.</p>
+              <p class="text-muted">Mediante la utlizacion de la herramienta JISON, se genero un scanner y un parser capaz de detectar errores sintacticos y lexicos en un archivo de entrada, al corregir dichos errores, se puede determinar si una clase es copia de otra mediante la evaluaciond de diferentes parametros</p>
             </div>
             <div class="col-sm-4 offset-md-1 py-4">
               <h4 class="text-white">Reportes</h4>
@@ -71,11 +71,11 @@
 
       <section class="jumbotron text-center">
         <div class="container">
-          <h1 class="jumbotron-heading">Album example</h1>
-          <p class="lead text-muted">Something short and leading about the collection below—its contents, the creator, etc. Make it short and sweet, but not too short so folks don't simply skip over it entirely.</p>
+          <h1 class="jumbotron-heading">Proyecto 2</h1>
+          <p class="lead text-muted">Analisis Sintactico utilizando JISON, reporte de clases copia, metodos, funciones y variables copia</p>
           <p>
-            <a href="#" class="btn btn-primary my-2">Main call to action</a>
-            <a href="#" class="btn btn-secondary my-2">Secondary action</a>
+            <a href="#" class="btn btn-primary my-2">Mas Detalles</a>
+            <a href="#" class="btn btn-secondary my-2">Salir</a>
           </p>
         </div>
       </section>
@@ -113,8 +113,6 @@
                                         type="button">Analizar</button>
                                         <button class="btn btn-outline-warning"   onclick="saveText()"
                                         type="button">Save Text</button>
-                                        <button class="btn btn-outline-danger"   onclick="saveText()"
-                                        type="button">Save Console</button>
                                 </div>
                             </div>
                             <br>
@@ -155,12 +153,11 @@
                                             <br>
                                             <div class="content">
                                                 <div class="btn-group" role="group" aria-label="...">
-                                                    <input type="file" style="width: 30%;" id="file-input" accept=".java" class="btn btn-outline-secondary form-control-file">
+                                                    <input type="file" style="width: 30%;" id="file-input2" accept=".java" class="btn btn-outline-secondary form-control-file">
                                                 
-                                                    <button class="btn btn-outline-primary" id="read-button" type="button">Cargar
-                                                        Doc</button>
-                                                        </div>
-                                                    </div>  
+                                                        <button class="btn btn-outline-primary" id="read-button2" type="button">Cargar Doc</button>
+                                                    </div>
+                                                </div>  
                                         <br>
                                             <textarea class="rownr" style="height: 600px;" rows="20" cols="3" value="1" readonly></textarea>
                                             <span>
@@ -175,7 +172,7 @@
 
 
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-2 align-self-center">
 
                                     
                                     <button class="btn btn-outline-success"  onclick="analizarCopia()"
@@ -188,9 +185,9 @@
                                             <br>
                                             <div class="content">
                                                 <div class="btn-group" role="group" aria-label="...">
-                                                    <input type="file" style="width: 30%;" id="file-input" accept=".java" class="btn btn-outline-secondary form-control-file">
+                                                    <input type="file" style="width: 30%;" id="file-input1" accept=".java" class="btn btn-outline-secondary form-control-file">
                                                 
-                                                    <button class="btn btn-outline-primary" id="read-button" type="button">Cargar
+                                                    <button class="btn btn-outline-primary" id="read-button1" type="button">Cargar
                                                         Doc</button>
                                                         </div>
                                                     </div>  
@@ -264,6 +261,7 @@
                     const element = response.consola[index];
                     cadena = cadena + element + "\n";  
                 }
+                document.getElementById("textAreaConsola").textContent = "";
                 document.getElementById("textAreaConsola").textContent = cadena;
                 ast = response.ast;
                 console.log(ast);
@@ -272,12 +270,22 @@
         }
         //CARGAR ARCHIVO
         document.querySelector("#read-button").addEventListener('click', function () {
-            if (document.querySelector("#file-input").files.length == 0) {
+            cargar("#file-input", "#textAreaAnalizar");
+        });
+        /*Cargar archivo copia 1*/
+        document.querySelector("#read-button1").addEventListener('click', function () {
+                cargar("#file-input1", "#textAreacopy2");
+        });
+        document.querySelector("#read-button2").addEventListener('click', function () {
+                cargar("#file-input2", "#textAreacopy");
+        });
+        function cargar(selector1, textArea){
+            if (document.querySelector(selector1).files.length == 0) {
                 alert('Error : No file selected');
                 return;
             }
             // first file selected by user
-            var file = document.querySelector("#file-input").files[0];
+            var file = document.querySelector(selector1).files[0];
     
             // perform validation on file type & size if required
     
@@ -289,7 +297,7 @@
                 // contents of file in variable     
                 var text = e.target.result;
     
-                document.querySelector("#textAreaAnalizar").innerHTML = text;
+                document.querySelector(textArea).innerHTML = text;
     
             });
     
@@ -297,10 +305,9 @@
             reader.addEventListener('error', function () {
                 alert('Error : Failed to read file');
             });
-    
             // read as text file
             reader.readAsText(file);
-        });
+        }
     
         //LINEAS DE CODIGO
         var cntline;
@@ -354,7 +361,7 @@
             }
             var cadena = "";
             $.ajax(settings).then(function (response) {
-    
+                console.log(response)
                 for (var i = 0; i < response.length; i++) {
                     cadena = cadena + "<tr>\n" + "     <th scope=\"row\">" + (i) + "</th>\n";
                     var obj = response[i];
@@ -363,23 +370,9 @@
                     }
                     cadena = cadena + "</tr>\n";
                 }
-                descargar(cadena, type);
+                var html = head + body1 + cadena2 + body3 + cadena + body2 + "</body>" + "</html>";
+                print(html, "error"+".html")
             });
-    
-        }
-    
-        function descargar(cadena, type) {
-    
-            var html = "";
-    
-            if (type == "lex") {
-                html = head + body1 + cadena2 + body3 + cadena + body2 + "</body>" + "</html>";
-            } else {
-                html = head + body1 + cadena3 + body3 + cadena + body2 + "</body>" + "</html>";
-            }
-    
-            print(html, "error"+".html")
-    
     
         }
     
@@ -497,9 +490,9 @@
                 /*SECCION FOR*/
                 else if(element.name == "For"){
                     getElements([element.assignationOrDeclaration])
-                    Condition(element.name + id + (i+i), element.condition.name);
+                    Condition(element.name + id + (i+i+1), element.condition.name);
                     concatenar = concatenar + "<li><span><i class=\"far fa-file\"></i><a> " + element.incrementDecrement.name + "</a></span></li>\n";
-                    InstructionList(element.list, "for" + id + (i+i+1))
+                    InstructionList(element.list, "for" + id + (i+i+i))
                 }
                 else if(element.name == "Break" || element.name == "Continue"){
                     concatenar = concatenar + "<li><span><i class=\"far fa-file\"></i><a> " + element.name + "</a></span></li>\n";
@@ -686,11 +679,7 @@
             "          <th scope=\"col\">Columna</th>\n" +
             "          <th scope=\"col\">Descripcion</th>\n";
     
-    
-        var cadena3 = "<th scope =\"col\">No</th>\n" +
-            "<th scope=\"col\">Descripcion</th>\n";
-    
-    
+
         var body1 = "<div class=\"container\">\n" +
             "    <div class=\"jumbotron jumbotron-fluid\">\n" +
             "      <div class=\"container\">\n" +
@@ -981,16 +970,7 @@
 
                         "</div></div></body>\n";
 
-                
-                
-                
 
-
-
-
-                
-                
-                
                 
                 print(html, "copia.html")
 

@@ -69,6 +69,8 @@ linecomment             ("/""/")("/")*(.|{identifier}|{number}|{decimal}|{string
 ">="                  return '>='
 "=="                  return '=='
 "!="                  return '!='
+"++"                  return '++'
+"--"                  return '--'
 "||"                  return '||'
 "&&"                  return '&&'
 "!"                   return '!'
@@ -114,7 +116,7 @@ linecomment             ("/""/")("/")*(.|{identifier}|{number}|{decimal}|{string
 %left '||'
 %left '&&'
 %left '==', '!='
-%left '>='  '<='  '<' '>'
+%left '>='  '<='  '<' '>' '++' '--'
 %left '+' '-'
 %left '*' '/' '^'
 %right '!'
@@ -441,15 +443,25 @@ CALL_FUNCTION
     : identifier '(' FUNCTION_PARAMETERS ')' ';'   {$$ = new CallFunction($1, $3, this._$.first_line, this._$.first_column);}
     ;
 
+
+NUMBER
+    : 'number' TYPE_NUMBER              
+    ;
+TYPE_NUMBER 
+    : '++'         	            {$$ = $1}
+    | '--'         	            {$$ = $1}
+    ;
+
+
 EXPRESION 
-    : '-' EXPRESION %prec UMENOS	       { $$ = new ArithmeticExpression($1, null, '-', this._$.first_line, this._$.first_column); }
+    : 'number'	'%' 			           { $$ = new ArithmeticExpression($1, null, $2, this._$.first_line, this._$.first_column); }
+    | 'number'	TYPE_NUMBER 			   { $$ = new ArithmeticExpression($1, null, $2, this._$.first_line, this._$.first_column); }
+    | '-' EXPRESION %prec UMENOS	       { $$ = new ArithmeticExpression($1, null, '-', this._$.first_line, this._$.first_column); }
     | EXPRESION '+' EXPRESION		       { $$ = new ArithmeticExpression($1, $3, '+', this._$.first_line, this._$.first_column); }
     | EXPRESION '-' EXPRESION		       { $$ = new ArithmeticExpression($1, $3, '-', this._$.first_line, this._$.first_column); }
     | EXPRESION '*' EXPRESION		       { $$ = new ArithmeticExpression($1, $3, '*', this._$.first_line, this._$.first_column); }
     | EXPRESION '/' EXPRESION	           { $$ = new ArithmeticExpression($1, $3, '/', this._$.first_line, this._$.first_column); }
     | EXPRESION '^' EXPRESION	           { $$ = new ArithmeticExpression($1, $3, '^', this._$.first_line, this._$.first_column); }
-    | 'number' '%'         	               { $$ = new ArithmeticExpression($1, null, '^', this._$.first_line, this._$.first_column); }
-    
     | EXPRESION '>=' EXPRESION	           { $$ = new RelationalExpression($1, $3, '>=',this._$.first_line, this._$.first_column); }
     | EXPRESION '<=' EXPRESION	           { $$ = new RelationalExpression($1, $3, '<=', this._$.first_line, this._$.first_column); }
     | EXPRESION '<' EXPRESION		       { $$ = new RelationalExpression($1, $3, '<', this._$.first_line, this._$.first_column); }

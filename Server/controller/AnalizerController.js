@@ -38,10 +38,11 @@ class AnalizerController {
             //Recorro y guardo los errores
             list.forEach(e => {
                 if(e.name == "Exception"){
-                    this.arrayErrores.push(e.description)
+                    this.arrayErrores.push(e)
                 } else {
                     if(e.name == "For"|| e.name == "Switch" || e.name == "Case" 
-                    || e.name == "DoWhile" || e.name == "While"|| e.name == "Function" || e.name == "Else"){
+                    || e.name == "DoWhile" || e.name == "While"|| e.name == "Function" || e.name == "Else"
+                    || e.name == "Default" || e.name == "Return" || e.name == "Method" || e.name == "CallFunction"){
                         this.armarExcepciones(e.list);
                     }
 
