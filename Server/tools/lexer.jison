@@ -26,6 +26,8 @@ BR              \r\n|\n|\r
 "+"                             return 'MAS';
 "-"                             return 'MENOS';
 "*"                             return 'POR';
+"^"                             return 'POTENCIA';
+"%"                             return 'PORCENTAJE';
 "?"                             return 'INTERROGACION';
 ","                             return 'COMA';
 ";"                             return 'PUNTO_Y_COMA';
@@ -46,9 +48,6 @@ BR              \r\n|\n|\r
 "]"                             return 'PAR_DER';
 '"'                             return 'COMILLA';
 "'"                             return 'COMILLA_SIMPLE'
-"int"                           return 'PR_int'
-
-
 .                               return 'LEXICAL_ERROR'
 <*><<EOF>>                      return 'EOF';
 %%

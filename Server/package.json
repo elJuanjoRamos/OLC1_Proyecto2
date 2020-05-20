@@ -5,6 +5,7 @@
   "scripts": {
     "start": "node ./bin/www",
     "jison": "node ./lib/cli.js ./tools/grammar.jison"
+    
   },
   "dependencies": {
     "body-parser": "^1.19.0",

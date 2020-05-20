@@ -28,6 +28,7 @@
     const {LogicExpression}         = require('./components/LogicExpression');
     const {RelationalExpression}    = require('./components/RelationalExpression');
     const {Exception}               = require('./components/Exception');
+    const {Method}                  = require('./components/Method');
     
 %}
 %lex
@@ -60,6 +61,8 @@ linecomment             ("/""/")("/")*(.|{identifier}|{number}|{decimal}|{string
 "-"                   return '-'
 "+"                   return '+'
 "*"                   return '*'
+"^"                   return '^'
+"%"                   return '%'
 "<"                   return '<'
 ">"                   return '>'
 "<="                  return '<='
@@ -111,9 +114,9 @@ linecomment             ("/""/")("/")*(.|{identifier}|{number}|{decimal}|{string
 %left '||'
 %left '&&'
 %left '==', '!='
-%left '>=', '<=', '<', '>'
+%left '>='  '<='  '<' '>'
 %left '+' '-'
-%left '*' '/'
+%left '*' '/' '^'
 %right '!'
 %left UMENOS
 
@@ -121,14 +124,13 @@ linecomment             ("/""/")("/")*(.|{identifier}|{number}|{decimal}|{string
 
 %%
 
-INIT 
+/*INIT 
     : CLASS EOF             {$$ = new Tree($1); return $$;}    
     ;
-
-/*INIT     
-    :                       { $$ = ''; console.log("empty"); } 
-    | INSTRUCCIONS EOF      {$$ = new Tree($1); return $$;}
-    ;*/
+*/
+INIT     
+    : INSTRUCCIONS EOF      {$$ = new Tree($1); return $$;}
+    ;
 
 //INSTRUCCIONES GLOBALES
 INSTRUCCIONS 
@@ -147,7 +149,8 @@ INSTRUCCIONS2
 
 //GLOBALES
 DECLARATION_TYPE
-    : DECLARATION       {$$ = $1;}
+    : CLASS             {$$ = $1;}
+    | DECLARATION       {$$ = $1;}
     | ASIGNATION        {$$ = $1;}
     | IF                {$$ = $1;}
     | COMMENTS          {$$ = $1;}
@@ -157,11 +160,8 @@ DECLARATION_TYPE
     | FOR               {$$ = $1;}
     | SWITCH            {$$ = $1;}
     | VOID_METHOD       {$$ = $1;}
-    | 'continue' ';'    {$$ = new Continue($1, this._$.first_line, this._$.first_column);}
-    | 'break' ';'       {$$ = new Break($1, this._$.first_line, this._$.first_column);}
-    | 'return' RETURN   {$$ = new Return( $1, $2, this._$.first_line, this._$.first_column);}
-    | error             {$$ = new Exception(yytext, "ERROR SINTACTICO: " + yytext + " en linea: " + (this._$.first_line) 
-                                                    + ", columna: " +  this._$.last_column, this._$.first_line, this._$.first_column)}
+    | error             {$$ = new Exception($1, "ERROR SINTACTICO: " + $1 + " en linea: " + (this._$.first_line) 
+                                                    + ", columna: " +  this._$.first_column, this._$.first_line, this._$.first_column)}
     
     ;
 
@@ -169,6 +169,7 @@ DECLARATION_TYPE
 //NIVEL DE METODO O FUNCION
 DECLARATION_TYPE_FUNCTION 
     : DECLARATION2      {$$ = $1;}
+    | CALL_FUNCTION     {$$ = $1;}
     | ASIGNATION3       {$$ = $1;}
     | IF                {$$ = $1;}
     | COMMENTS          {$$ = $1;}
@@ -177,13 +178,17 @@ DECLARATION_TYPE_FUNCTION
     | PRINT             {$$ = $1;}
     | FOR               {$$ = $1;}
     | SWITCH            {$$ = $1;}
+
     | 'continue' ';'    {$$ = new Continue($1, this._$.first_line, this._$.first_column);}
     | 'break' ';'       {$$ = new Break($1, this._$.first_line, this._$.first_column);}
-    | 'return' RETURN   {$$ = new Return( $1, $2, this._$.first_line, this._$.first_column);}
-    | error             {$$ = new Exception(yytext, "ERROR SINTACTICO: " + yytext + " en linea: " + (this._$.first_line) 
-                                                    + ", columna: " +  this._$.last_column, this._$.first_line, this._$.first_column)}
+    | 'return' ';'          {$$ = new Return( $1, $2, this._$.first_line, this._$.first_column);}
+    | error             {$$ = new Exception($1, "ERROR SINTACTICO: " + $1 + " en linea: " + (this._$.first_line) 
+                                                    + ", columna: " +  this._$.first_column, this._$.first_line, this._$.first_column)}
     ;
 
+/*
+
+*/
 
 ERROR 
     : '}'
@@ -195,8 +200,9 @@ ERROR
 
 /*SECCION CLASS*/
 CLASS 
-    : IMPORTS 'class' identifier '{' INSTRUCCIONS '}' {$$ = new Class($3, $5, $1);} 
+    : IMPORTS 'class' identifier INSTRUCCIONS_BLOCK_CLASS {$$ = new Class($3, $4, $1);} 
     ;
+
 RETURN 
     : EXPRESION ';'     {$$ = $1;}
     | ';'               {$$ = [];}
@@ -204,18 +210,20 @@ RETURN
 
 /* SECCION IMPORT */
 
-
 IMPORTS 
-    : IMPORT                                {$$ = [$1];}
-    | /*EPSILON*/                           {$$ = null;}
+    :  MY_IMPORTS              { $$ = $1 } 
+    |                          { $$ = [] } 
     ;
+
+MY_IMPORTS 
+    : MY_IMPORTS IMPORT            { $$ = $1; $$.push($2); }
+    | IMPORT                          { $$ = [$1]; }
+    ;
+
 IMPORT 
-    : 'import' identifier ';' MORE_IMPORTS  {$$ = new Import($2,  this._$.first_line, this._$.first_column);}
+    : 'import' identifier ';' {$$ = new Import($2,  this._$.first_line, this._$.first_column);}
     ;
-MORE_IMPORTS 
-    : 'import' identifier ';' MORE_IMPORTS  {$$ = new Import($2,  this._$.first_line, this._$.first_column);}
-    | //EPSILON
-    ;
+
 
 
 TYPE : 'int'        {$$ = new DataType('int');}
@@ -235,7 +243,7 @@ COMMENTS
 
 DECLARATION 
     : TYPE identifier VALUE              ';'     {$$ = new Declaration($1, $2, $3, this._$.first_line, this._$.first_column);}  
-    | TYPE identifier '(' PARAMETERS ')'        '{' INSTRUCCIONS '}' {$$ = new Function($1, $2, [$4], $7, this._$.first_line, this._$.first_column);} 
+    | TYPE identifier '(' PARAMETERS ')'         '{' INSTRUCCIONS2 'return' EXPRESION ';' '}' {$$ = new Function($1, $2, $4, $7, $9, this._$.first_line, this._$.first_column);} 
     ;
 
 
@@ -261,7 +269,6 @@ MORE_VALUES
 
 ASIGNATION 
     : identifier '=' EXPRESION  ';'              {$$ = new Assignation($1, $3, this._$.first_line, this._$.first_column);}
-    | identifier '(' FUNCTION_PARAMETERS ')' ';' {$$ = new CallFunction($1, [$3], this._$.first_line, this._$.first_column);}
     ;
 
 
@@ -285,35 +292,55 @@ ASIGNATION2
 
 /*SECCION METODOS Y FUNCIONES*/
 PARAMETERS 
-    : PARAMETER
-    | /*EPSILON*/                           {$$ = null;}
+    :  MY_PARAMETERS    {$$ = $1;}
+    |                   {$$ = [];}
     ;
+
+MY_PARAMETERS 
+    : MY_PARAMETERS PARAMETER            { $$ = $1; $$.push($2); }
+    | PARAMETER                          { $$ = [$1]; }
+    ;
+
 
 PARAMETER 
-    : TYPE identifier MORE_PARAMETER        {$$ = new Declaration($1, $2, null, this._$.first_line, this._$.first_column);}
+    : TYPE identifier                       {$$ = new Declaration($1, $2, null, this._$.first_line, this._$.first_column);  }
+    | ',' TYPE identifier                   {$$ = new Declaration($2, $3, null, this._$.first_line, this._$.first_column);  }
     ;
-MORE_PARAMETER 
-    : ',' TYPE identifier MORE_PARAMETER    {$$ = new Declaration($2, $3, null, this._$.first_line, this._$.first_column);}
-    | //EPSILON
-    ;
+
+
+
+
+
 
 FUNCTION_PARAMETERS 
-    : FUNCTION_PARAMETER                        {$$ = $1;}
+    :  MY_FUNCTION_PARAMETERS    {$$ = $1;}
+    |                            {$$ = [];}
     ;
 
+MY_FUNCTION_PARAMETERS 
+    : MY_FUNCTION_PARAMETERS FUNCTION_PARAMETER            { $$ = $1; $$.push($2); }
+    | FUNCTION_PARAMETER                                { $$ = [$1]; }
+    ;
+
+
 FUNCTION_PARAMETER 
-    : identifier MORE_FUNCTION_PARAMETER         {$$ = new Identifier($1, this._$.first_line, this._$.first_column);}
-    | /*EPSILON*/                                {$$ = null;}
+    : identifier                       {$$ = new Identifier($1, this._$.first_line, this._$.first_column);  }
+    | ',' identifier                   {$$ = new Identifier($2, this._$.first_line, this._$.first_column);  }
     ;
-MORE_FUNCTION_PARAMETER 
-    : ',' identifier  MORE_FUNCTION_PARAMETER
-    | /*EPSILON*/                                
-    ;
+
+
+
+
+
+
+
+
+
 
 /* SECCION METODO*/
 VOID_METHOD 
-    : 'void' 'main' '('  ')'     '{' INSTRUCCIONS '}'    {$$ = new Function('void', 'main', [], $6, this._$.first_line, this._$.first_column);} 
-    | 'void' identifier '(' PARAMETERS ')' '{' INSTRUCCIONS '}'    {$$ = new Function('void', $2, [$4], $7, this._$.first_line, this._$.first_column);}
+    : 'void' 'main' '('  ')'     '{' INSTRUCCIONS2 '}'    {$$ = new Method('void', 'main', [], $6, this._$.first_line, this._$.first_column);} 
+    | 'void' identifier '(' PARAMETERS ')' '{' INSTRUCCIONS2 '}'    {$$ = new Method('void', $2, $4, $7, this._$.first_line, this._$.first_column);}
     ;
 
 /*SECCION IF*/
@@ -331,6 +358,12 @@ INSTRUCCIONS_BLOCK
     : '{' INSTRUCCIONS2 '}' {$$ = $2;}
     | '{' '}' {$$ = [];}
     ;
+
+INSTRUCCIONS_BLOCK_CLASS 
+    : '{' INSTRUCCIONS '}' {$$ = $2;}
+    | '{' '}' {$$ = [];}
+    ;
+
 
 /* SECCION WHILE*/
 
@@ -369,20 +402,29 @@ INCREMENT_DECREMENT
 /* SECCION SWITCH*/
 
 SWITCH
-    : 'switch' IF_CONDITION '{'  CASE DEFAULT  '}' {$$ = new Switch($2, [$4], $5, this._$.first_line, this._$.first_column);}
+    : 'switch' IF_CONDITION '{'  INSTRUCTION_SWITCH  DEFAULT  '}' {$$ = new Switch($2, $4, [$5], this._$.first_line, this._$.first_column);}
+    ;
+
+
+INSTRUCTION_SWITCH
+    :  CASES    {$$ = $1;}
+    |           {$$ = [];}
+    ;
+
+CASES 
+    : CASES CASE            { $$ = $1; $$.push($2); }
+    | CASE                  { $$ = [$1]; }
     ;
 
 CASE 
-    : 'case' EXPRESION ':' INSTRUCCIONS 'break' ';' MORE_CASES {$$ = new Case($2, $4, this._$.first_line, this._$.first_column);}
+    : 'case' EXPRESION ':' INSTRUCCIONS2 'break' ';' {$$ = new Case($2, $4, this._$.first_line, this._$.first_column);}
     ;
 
-MORE_CASES
-    : CASE
-    | //epsilon
-    ;
+
 DEFAULT 
-    : 'default' ':' INSTRUCCIONS {$$ = new Default($3, this._$.first_line, this._$.first_column);}
+    : 'default' ':' INSTRUCCIONS2 {$$ = new Default($3, this._$.first_line, this._$.first_column);}
     ;
+
 
 
 /* SECCION PRINT */
@@ -396,7 +438,7 @@ TYPE_PRINT
 
 /*  SECCION LLAMADA A FUNCIONES */
 CALL_FUNCTION 
-    : identifier '(' PARAMETERS ')' ';'
+    : identifier '(' FUNCTION_PARAMETERS ')' ';'   {$$ = new CallFunction($1, $3, this._$.first_line, this._$.first_column);}
     ;
 
 EXPRESION 
@@ -405,9 +447,8 @@ EXPRESION
     | EXPRESION '-' EXPRESION		       { $$ = new ArithmeticExpression($1, $3, '-', this._$.first_line, this._$.first_column); }
     | EXPRESION '*' EXPRESION		       { $$ = new ArithmeticExpression($1, $3, '*', this._$.first_line, this._$.first_column); }
     | EXPRESION '/' EXPRESION	           { $$ = new ArithmeticExpression($1, $3, '/', this._$.first_line, this._$.first_column); }
-    
-    | '<''='                  	           { $$ = new RelationalExpression(null, null, '<=', this._$.first_line, this._$.first_column); }
-    
+    | EXPRESION '^' EXPRESION	           { $$ = new ArithmeticExpression($1, $3, '^', this._$.first_line, this._$.first_column); }
+    | 'number' '%'         	               { $$ = new ArithmeticExpression($1, null, '^', this._$.first_line, this._$.first_column); }
     
     | EXPRESION '>=' EXPRESION	           { $$ = new RelationalExpression($1, $3, '>=',this._$.first_line, this._$.first_column); }
     | EXPRESION '<=' EXPRESION	           { $$ = new RelationalExpression($1, $3, '<=', this._$.first_line, this._$.first_column); }

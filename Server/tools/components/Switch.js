@@ -2,8 +2,7 @@ class Switch  {
     /**
      * @constructor 
      * @param condition Condicion del switch
-     * @param caselist Lista de casos
-     * @param default Default 
+     * @param list Lista de casos
      * @param line Linea de la sentencia 
      * @param column Columna de la sentencia
 
@@ -13,7 +12,7 @@ class Switch  {
         this.line = l;
         this.column = c;
         this.condition = cond;
-        this.caselist = lst;
+        this.list = lst;
         this.default = def;
     }
 }

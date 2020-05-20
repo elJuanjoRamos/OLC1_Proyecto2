@@ -2,8 +2,8 @@
 var tok = require('../model/Token');
 class LexicalController {
     
-    arrayToken = [];
-    arrayError = [];
+    arrayToken = new Array();
+    arrayError = new Array();
     hayError = false;
     constructor(){
         console.log("Lexical Controller");
@@ -24,8 +24,9 @@ class LexicalController {
         return this.hayError
     }
     clear(){
-        this.arrayError = []
-        this.arrayToken = []
+        this.hayError = false;
+        this.arrayError = new Array();
+        this.arrayToken = new Array();
     }    
 }
 

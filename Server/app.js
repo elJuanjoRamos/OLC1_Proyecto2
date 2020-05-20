@@ -14,16 +14,15 @@ var api = "/api/v1/server";
 //QUE INSTALAR
 //npm install jison
 //npm install jison-lex
-/*
-var a = "import a; import a;  class a{ int a; }"
+
+/*var a = "import a; class a{ int a() { int a; return a<0; } } "
 
 var parser = require('./tools/grammar');
 
 
 var tree = parser.parse(a);
 
-console.log(tree)
-*/
+console.log(tree.instructions[0])*/
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

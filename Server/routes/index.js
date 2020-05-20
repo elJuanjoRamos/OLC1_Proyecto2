@@ -3,10 +3,9 @@ var router = express.Router();
 
 var controller = require('../controller/LexicalCotroller');
 var analizerController = require('../controller/AnalizerController');
-
 var lexController = new controller();
 var anController = new analizerController();
-const Table_1 = require("../tools/components/Table");
+
 
 //PARSER
 var parser = require('../tools/grammar.js');
@@ -31,9 +30,12 @@ router.get('/sinterror', (req, res) => {
 router.post('/analizar', function (req, res, next) {
   
   const { entrada, consola } = req.body;
+  
+
+
+  var array = new Array();
   lexController.clear();
-  anController.clear();
-  var array = [];
+
 
   lexer.setInput(entrada);
   while (!lexer.done) {
@@ -49,34 +51,17 @@ router.post('/analizar', function (req, res, next) {
   }
 
   if (lexController.getError()) {
-    res.json({ entrada: entrada, consola: array, ast: { "instructions": [{ "name": "No Tree" }] }, type : "lexico" })
+    res.json({ entrada: entrada, consola: array, ast: { "name": "No tree", "list": [] }, type : "lexico" })
   } else {
     
     //HACE EL PARSER
     var tree = parser.parse(entrada);
+    //console.log(tree.instructions[0])
     
-    //HAGO UN FOREACH EN LAS ISTRUCCIONES PARA VER SI HAY ALGUN ERROR
-    tree.instructions.list.forEach(element => {
-        if(element.name == "Exception"){
-          lexController.addError(element.description);
-          array.push(element.description)
-        } else {
-          
+    
+    //Se la lista para evaluar las excepciones
+    anController.armarExcepciones(tree.instructions[0].list);
 
-          //SI EN LAS INSTRUCCIONES EXISTEN INSTRUCCIONES ANIDADAS 
-          // SE ENVIA A UN METODO RECURSIVO PARA BUSCAR ERRORESS
-          if(element.name == "For"|| element.name == "Switch" || element.name == "Case" || element.name == "Do"
-                 || element.name == "While"|| element.name == "Function"  || element.name == "If"|| element.name == "Else"){
-                                    
-                  if(element.name == "If"){
-                      anController.armarExcepciones(element.list)
-                      anController.armarExcepciones(element.ElseList);
-                  } else {
-                      anController.armarExcepciones(element.list) 
-                  }
-            }
-        }
-    });
 
     //SE HACE UN FOREACH AL ARRAY QUE RETORNA EL CONTROLADOR QUE BUSCO 
     //LOS ERRORES EN LAS INSTRUCCIONES ANIDADAS
@@ -84,10 +69,35 @@ router.post('/analizar', function (req, res, next) {
       lexController.addError(element.description);
       array.push(element);
     });
-    res.json({ entrada: entrada, consola: array, ast: tree.instructions, type : "sintactico" })
+    res.json({ entrada: entrada, consola: array, ast: tree.instructions[0], type : "sintactico" })
   }
 });
 
+
+router.post('/copia', function(req, res, next) {
+
+
+  const { entrada, copia } = req.body;
+
+  anController.clear();
+  var tree = parser.parse(entrada);
+  
+  var treecopy = parser.parse(copia);
+  
+
+
+  //console.log(anController.compararClases(tree.instructions[0], treecopy.instructions[0]))
+
+  var claseCopia = anController.compararClases(tree.instructions[0], treecopy.instructions[0]);
+  var funcionesCopia = anController.compararFunciones(tree.instructions[0], treecopy.instructions[0], claseCopia.EsCopia)
+  var metodosCopia = anController.compararMetodos(tree.instructions[0], treecopy.instructions[0], claseCopia.EsCopia);
+  var variablesMetodoCopia = anController.getVariables(metodosCopia);
+  var variablesFuncionCopia = anController.getVariables(funcionesCopia)
+
+
+  res.json({ claseCopia: claseCopia, funcCopia: funcionesCopia, metCopia: metodosCopia, varMtCopia : variablesMetodoCopia, varFuCopia: variablesFuncionCopia })
+
+});
 
 
 

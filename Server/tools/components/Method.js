@@ -1,4 +1,4 @@
-class Function {
+class Method {
     /**
      * @constructor Retorna el objeto break creado
      * @param type tipo de la funcion
@@ -9,15 +9,14 @@ class Function {
      * @param line del break
      
      */
-    constructor(t, i,params , lst,  r, c, l) {
-        this.name = "Function";
+    constructor(t, i,params , lst,  c, l) {
+        this.name = "Method";
         this.type = t;
         this.id = i;
         this.list = lst;
         this.column = c;
         this.line = l;
         this.parameter = params;
-        this.return = r;
     }
 }
-exports.Function = Function;
+exports.Method = Method;
