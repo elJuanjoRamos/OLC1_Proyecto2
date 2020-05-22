@@ -87,8 +87,7 @@ class AnalizerController {
 
             //Busco los metodos y funciones de la clase 2
             this.getMethodsAndFunctions(treeCopy.list, this.methodsClass2, this.functionClass2);
-
-
+            
             //verificar si la cantidad de elementos es la misma
             if(this.functionClass1.length == this.functionClass2.length 
                 && this.methodsClass1.length == this.methodsClass2.length){
@@ -190,7 +189,7 @@ class AnalizerController {
 
     compararFunciones(tree, treeCopy, result){
         //Verifica que la clase sea copia
-        if(result == "True"){
+        if(tree.id == treeCopy.id){
 
             //Busco los metodos y funciones de la clase 1
             this.getFunctions(tree.list, this.function);

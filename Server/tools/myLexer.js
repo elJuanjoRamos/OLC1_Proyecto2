@@ -5,9 +5,8 @@ var JisonLex = require('jison-lex');
 var symbols = fs.readFileSync('./tools/lexer.jison', 'utf8');
 
 // generate source
-//var lexerSource = JisonLex.generate(symbols);
 
-// or create a parser in memory
+// create a parser in memory
 var lexer = new JisonLex(symbols);
 
 

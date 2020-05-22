@@ -1,6 +1,6 @@
 class If  {
     /**
-     * @constructor Crea el nodo instruccion para la sentencia IF
+     * @constructor 
      * @param condition Condicion que debe ser tipo boolean
      * @param list Lista de instrucciones a ejecutar en caso la condicion sea verdadera
      * @param ElseList Lista de instrucciones a ejecutar en caso la condicion sea falsa

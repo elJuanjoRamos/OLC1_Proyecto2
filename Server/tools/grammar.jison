@@ -65,8 +65,6 @@ linecomment             ("/""/")("/")*(.|{identifier}|{number}|{decimal}|{string
 "%"                   return '%'
 "<"                   return '<'
 ">"                   return '>'
-"<="                  return '<='
-">="                  return '>='
 "=="                  return '=='
 "!="                  return '!='
 "++"                  return '++'
@@ -116,7 +114,7 @@ linecomment             ("/""/")("/")*(.|{identifier}|{number}|{decimal}|{string
 %left '||'
 %left '&&'
 %left '==', '!='
-%left '>='  '<='  '<' '>' '++' '--'
+%left '<' '>' 
 %left '+' '-'
 %left '*' '/' '^'
 %right '!'
@@ -126,10 +124,6 @@ linecomment             ("/""/")("/")*(.|{identifier}|{number}|{decimal}|{string
 
 %%
 
-/*INIT 
-    : CLASS EOF             {$$ = new Tree($1); return $$;}    
-    ;
-*/
 INIT     
     : INSTRUCCIONS EOF      {$$ = new Tree($1); return $$;}
     ;
@@ -180,7 +174,6 @@ DECLARATION_TYPE_FUNCTION
     | PRINT             {$$ = $1;}
     | FOR               {$$ = $1;}
     | SWITCH            {$$ = $1;}
-
     | 'continue' ';'    {$$ = new Continue($1, this._$.first_line, this._$.first_column);}
     | 'break' ';'       {$$ = new Break($1, this._$.first_line, this._$.first_column);}
     | 'return' ';'          {$$ = new Return( $1, $2, this._$.first_line, this._$.first_column);}
@@ -448,22 +441,23 @@ NUMBER
     : 'number' TYPE_NUMBER              
     ;
 TYPE_NUMBER 
-    : '++'         	            {$$ = $1}
-    | '--'         	            {$$ = $1}
+    : '+' '+'         	            {$$ = $1}
+    | '-' '-'         	            {$$ = $1}
+    | '%'           	            {$$ = $1}
     ;
 
 
 EXPRESION 
-    : 'number'	'%' 			           { $$ = new ArithmeticExpression($1, null, $2, this._$.first_line, this._$.first_column); }
-    | 'number'	TYPE_NUMBER 			   { $$ = new ArithmeticExpression($1, null, $2, this._$.first_line, this._$.first_column); }
+    : 'number'	'%' 		        	   { $$ = new ArithmeticExpression($1, null, $2, this._$.first_line, this._$.first_column); }
+    | 'decimal'	'%'          			   { $$ = new ArithmeticExpression($1, null, $2, this._$.first_line, this._$.first_column); }    
     | '-' EXPRESION %prec UMENOS	       { $$ = new ArithmeticExpression($1, null, '-', this._$.first_line, this._$.first_column); }
     | EXPRESION '+' EXPRESION		       { $$ = new ArithmeticExpression($1, $3, '+', this._$.first_line, this._$.first_column); }
     | EXPRESION '-' EXPRESION		       { $$ = new ArithmeticExpression($1, $3, '-', this._$.first_line, this._$.first_column); }
     | EXPRESION '*' EXPRESION		       { $$ = new ArithmeticExpression($1, $3, '*', this._$.first_line, this._$.first_column); }
     | EXPRESION '/' EXPRESION	           { $$ = new ArithmeticExpression($1, $3, '/', this._$.first_line, this._$.first_column); }
     | EXPRESION '^' EXPRESION	           { $$ = new ArithmeticExpression($1, $3, '^', this._$.first_line, this._$.first_column); }
-    | EXPRESION '>=' EXPRESION	           { $$ = new RelationalExpression($1, $3, '>=',this._$.first_line, this._$.first_column); }
-    | EXPRESION '<=' EXPRESION	           { $$ = new RelationalExpression($1, $3, '<=', this._$.first_line, this._$.first_column); }
+    | EXPRESION '>' '=' EXPRESION	       { $$ = new RelationalExpression($1, $4, '>' + '=',this._$.first_line, this._$.first_column); }
+    | EXPRESION '<' '=' EXPRESION	       { $$ = new RelationalExpression($1, $4, '<' + '=', this._$.first_line, this._$.first_column); }
     | EXPRESION '<' EXPRESION		       { $$ = new RelationalExpression($1, $3, '<', this._$.first_line, this._$.first_column); }
     | EXPRESION '>' EXPRESION		       { $$ = new RelationalExpression($1, $3, '>', this._$.first_line, this._$.first_column); }
     | EXPRESION '==' EXPRESION	           { $$ = new RelationalExpression($1, $3, '==', this._$.first_line, this._$.first_column); }
@@ -478,5 +472,7 @@ EXPRESION
     | STRING_LITERAL			           { $$ = new Expression(new DataType('string'), $1.replace(/\"/g,""), this._$.first_line, this._$.first_column); }
     | char_literal			               { $$ = new Expression(new DataType('char'), $1.replace(/\'/g,""), this._$.first_line, this._$.first_column); }*/
     | identifier		                   { $$ = new Identifier($1, this._$.first_line, this._$.first_column); }
+    | '+'		                           { $$ = $1 }
+    | '-'		                           { $$ = $1 }
     | '(' EXPRESION ')'		               { $$ = $2; }                          
     ;

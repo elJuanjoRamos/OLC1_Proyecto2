@@ -59,11 +59,21 @@ router.post('/analizar', function (req, res, next) {
     anController.clear();
     //HACE EL PARSER
     var tree = parser.parse(entrada);
-    console.log(tree.instructions[0])
+
+    var newTree;
+
+    for (let i = 0; i < tree.instructions.length; i++) {
+      const element = tree.instructions[i];
+        if(element.name == "Class") {
+          newTree = element;
+          break;
+      }
+    }
+    console.log(newTree)
     
     
     //Se envia la lista la lista para evaluar las excepciones
-    anController.armarExcepciones(tree.instructions[0].list);
+    anController.armarExcepciones(newTree.list);
 
 
     //SE HACE UN FOREACH AL ARRAY QUE RETORNA EL CONTROLADOR QUE BUSCO 
@@ -73,7 +83,7 @@ router.post('/analizar', function (req, res, next) {
       array.push(element.description);
     });
     
-    res.json({ entrada: entrada, consola: array, ast: tree.instructions[0], type : "sintactico" })
+    res.json({ entrada: entrada, consola: array, ast: newTree, type : "sintactico" })
   }
 });
 
@@ -89,18 +99,39 @@ router.post('/copia', function(req, res, next) {
   var treecopy = parser.parse(copia);
   
 
+  var newTree;
+  var newTreeCopy;
+
+  for (let i = 0; i < tree.instructions.length; i++) {
+    const element = tree.instructions[i];
+    if(element.name == "Class"){
+      newTree = element;
+      break;
+    }  
+  }
+
+  for (let i = 0; i < treecopy.instructions.length; i++) {
+    const element = treecopy.instructions[i];
+    if(element.name == "Class"){
+      newTreeCopy = element;
+      break;
+    }  
+  }
+
+  console.log(newTree)
+  console.log("copia")
+  console.log(newTreeCopy)
 
   //console.log(anController.compararClases(tree.instructions[0], treecopy.instructions[0]))
 
-  var claseCopia = anController.compararClases(tree.instructions[0], treecopy.instructions[0]);
-  var funcionesCopia = anController.compararFunciones(tree.instructions[0], treecopy.instructions[0], claseCopia.EsCopia)
-  var metodosCopia = anController.compararMetodos(tree.instructions[0], treecopy.instructions[0], claseCopia.EsCopia);
+  var claseCopia = anController.compararClases(newTree, newTreeCopy);
+  var funcionesCopia = anController.compararFunciones(newTree, newTreeCopy, claseCopia.EsCopia)
+  var metodosCopia = anController.compararMetodos(newTree, newTreeCopy, claseCopia.EsCopia);
   var variablesMetodoCopia = anController.getVariables(metodosCopia);
   var variablesFuncionCopia = anController.getVariables(funcionesCopia)
 
 
   res.json({ claseCopia: claseCopia, funcCopia: funcionesCopia, metCopia: metodosCopia, varMtCopia : variablesMetodoCopia, varFuCopia: variablesFuncionCopia })
-
 });
 
 
